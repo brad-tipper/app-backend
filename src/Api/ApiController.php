@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Api;
 
+use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Auth\SessionService;
 use BradTipper\AppBackend\Support\RateLimiter;
 use Psr\Log\LoggerInterface;
@@ -164,7 +165,7 @@ abstract class ApiController extends Controller
 
     protected function limit(string $key, int $max, int $windowSeconds): void
     {
-        if (!RateLimiter::hit($key, $max, $windowSeconds)) {
+        if (!RateLimiter::hit($key, $max * max(1, (int) AppConfig::get('rate_limit_multiplier')), $windowSeconds)) {
             throw ApiException::tooManyRequests();
         }
     }
