@@ -240,10 +240,11 @@ abstract class SyncController extends ApiController
             ...static::itemProperties(),
             'deleted' => Spec::boolean(),
             'deleted_at' => Spec::string('date-time', true),
-            'created_at' => Spec::string('date-time', true),
-            'updated_at' => Spec::string('date-time', true),
+            'created_at' => Spec::string('date-time'),
+            'updated_at' => Spec::string('date-time'),
         ];
-        $spec->schema($name, Spec::object($props));
+        // deleted_at is always sent but optional for clients building rows locally (not every entity is trashable).
+        $spec->schema($name, Spec::object($props, array_values(array_diff(array_keys($props), ['deleted_at']))));
         $spec->schema("{$name}List", Spec::object([
             'items' => Spec::arrayOf(Spec::ref($name)),
             'server_time' => Spec::string('date-time'),
