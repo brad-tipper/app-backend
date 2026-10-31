@@ -5,7 +5,7 @@
 #   tools/dev-rig.sh sake <api-dir> …  run `vendor/bin/sake …` in the project
 #   tools/dev-rig.sh down
 # Expects the API project and app-backend side by side (../app-backend) and a composer.dev.json that
-# path-links the module (see docs/PLAYBOOK.md). The project's .env must point SS_DATABASE_SERVER at ss-db
+# path-links the module (see the migration PLAYBOOK in the documents repo). The project's .env must point SS_DATABASE_SERVER at ss-db
 # and MAILER_DSN at smtp://ss-mail:1025.
 set -euo pipefail
 cmd="${1:-}"; shift || true
