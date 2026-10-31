@@ -17,7 +17,7 @@ use SilverStripe\Security\Member;
 /**
  * REST resource for an offline-first entity:
  *
- *   GET    /v1/{resource}?updatedSince=&includeDeleted=   delta fetch
+ *   GET    /v1/{resource}?updated_since=&include_deleted=   delta fetch
  *   GET    /v1/{resource}/{id}
  *   PUT    /v1/{resource}/{id}                            idempotent create-or-update
  *   DELETE /v1/{resource}/{id}[?permanent=true]           soft (default) or hard delete
@@ -106,7 +106,7 @@ abstract class SyncController extends ApiController
 
         return match ($method) {
             'GET' => $this->json($this->toItem($this->findOr404($member, $id))),
-            'PUT' => $this->upsertRow($request, $member, $id),
+            'PUT', 'PATCH' => $this->upsertRow($request, $member, $id),
             'DELETE' => $this->removeRow($request, $member, $id),
             default => throw ApiException::methodNotAllowed(),
         };
@@ -116,15 +116,15 @@ abstract class SyncController extends ApiController
     private function listRows(HTTPRequest $request, Member $member): array
     {
         $list = $this->visibleTo($member);
-        $since = $request->getVar('updatedSince');
+        $since = $request->getVar('updated_since');
         if (is_string($since) && $since !== '') {
             $time = strtotime($since);
             if ($time === false) {
-                throw ApiException::validation(['updatedSince' => ['Must be an ISO 8601 timestamp.']]);
+                throw ApiException::validation(['updated_since' => ['Must be an ISO 8601 timestamp.']]);
             }
             $list = $list->filter('LastEdited:GreaterThanOrEqual', gmdate('Y-m-d H:i:s', $time));
         }
-        if (!in_array($request->getVar('includeDeleted'), ['1', 'true', 1, true], true)) {
+        if (!in_array($request->getVar('include_deleted'), ['1', 'true', 1, true], true)) {
             $list = $list->filter('Deleted', false);
         }
         $serverTime = gmdate(DATE_ATOM);
@@ -132,7 +132,7 @@ abstract class SyncController extends ApiController
         foreach ($list->sort('LastEdited', 'ASC') as $row) {
             $items[] = $this->toItem($row);
         }
-        return ['items' => $items, 'serverTime' => $serverTime];
+        return ['items' => $items, 'server_time' => $serverTime];
     }
 
     private function upsertRow(HTTPRequest $request, Member $member, string $id): HTTPResponse
@@ -144,6 +144,9 @@ abstract class SyncController extends ApiController
             throw ApiException::notFound();
         }
         $isNew = $row === null;
+        if ($isNew && strtoupper($request->httpMethod()) === 'PATCH') {
+            throw ApiException::notFound();
+        }
         if (!$isNew && !$this->canEdit($member, $row)) {
             throw ApiException::forbidden();
         }
@@ -185,6 +188,20 @@ abstract class SyncController extends ApiController
         return $this->noContent();
     }
 
+    /**
+     * Every row the member can see, deleted ones included (for the data export).
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function exportRows(Member $member): array
+    {
+        $rows = [];
+        foreach ($this->visibleTo($member)->sort('Created', 'ASC') as $row) {
+            $rows[] = $this->toItem($row);
+        }
+        return $rows;
+    }
+
     private function findOr404(Member $member, string $id): DataObject
     {
         $row = $this->visibleTo($member)->filter('UUID', $id)->first();
@@ -199,12 +216,12 @@ abstract class SyncController extends ApiController
     {
         return [
             'id' => $row->UUID,
-            'ownerId' => $row->Owner()->UUID,
+            'owner_id' => $row->Owner()->UUID,
             ...$this->toApi($row),
             'deleted' => (bool) $row->Deleted,
-            'deletedAt' => ApiMemberExtension::iso($row->DeletedAt),
-            'createdAt' => ApiMemberExtension::iso($row->Created),
-            'updatedAt' => ApiMemberExtension::iso($row->LastEdited),
+            'deleted_at' => ApiMemberExtension::iso($row->DeletedAt),
+            'created_at' => ApiMemberExtension::iso($row->Created),
+            'updated_at' => ApiMemberExtension::iso($row->LastEdited),
         ];
     }
 
@@ -219,29 +236,30 @@ abstract class SyncController extends ApiController
 
         $props = [
             'id' => Spec::string('uuid'),
-            'ownerId' => Spec::string('uuid'),
+            'owner_id' => Spec::string('uuid'),
             ...static::itemProperties(),
             'deleted' => Spec::boolean(),
-            'deletedAt' => Spec::string('date-time', true),
-            'createdAt' => Spec::string('date-time', true),
-            'updatedAt' => Spec::string('date-time', true),
+            'deleted_at' => Spec::string('date-time', true),
+            'created_at' => Spec::string('date-time', true),
+            'updated_at' => Spec::string('date-time', true),
         ];
         $spec->schema($name, Spec::object($props));
         $spec->schema("{$name}List", Spec::object([
             'items' => Spec::arrayOf(Spec::ref($name)),
-            'serverTime' => Spec::string('date-time'),
+            'server_time' => Spec::string('date-time'),
         ]));
         $spec->schema("{$name}Input", Spec::object(
             [...static::writeProperties(), 'deleted' => Spec::boolean()],
             static::writeRequired(),
         ));
+        $spec->schema("{$name}Patch", Spec::object([...static::writeProperties(), 'deleted' => Spec::boolean()], []));
 
         $plural = ucfirst(static::resourcePath());
         $spec->operation('get', $path, "list{$plural}", [
             'tags' => $tag, 'summary' => "List {$name} rows (delta sync)", 'auth' => true,
             'query' => [
-                'updatedSince' => ['schema' => Spec::string('date-time')],
-                'includeDeleted' => ['schema' => Spec::boolean()],
+                'updated_since' => ['schema' => Spec::string('date-time')],
+                'include_deleted' => ['schema' => Spec::boolean()],
             ],
             'responses' => [200 => Spec::ref("{$name}List")],
         ]);
@@ -253,6 +271,11 @@ abstract class SyncController extends ApiController
             'tags' => $tag, 'summary' => "Create or update a {$name} (idempotent)", 'auth' => true, 'path' => $idParam,
             'body' => Spec::ref("{$name}Input"),
             'responses' => [200 => Spec::ref($name), 201 => Spec::ref($name)],
+        ]);
+        $spec->operation('patch', "{$path}/{id}", "patch{$name}", [
+            'tags' => $tag, 'summary' => "Update fields of a {$name}", 'auth' => true, 'path' => $idParam,
+            'body' => Spec::ref("{$name}Patch"),
+            'responses' => [200 => Spec::ref($name)],
         ]);
         $spec->operation('delete', "{$path}/{id}", "delete{$name}", [
             'tags' => $tag, 'summary' => "Delete a {$name} (soft by default)", 'auth' => true, 'path' => $idParam,
