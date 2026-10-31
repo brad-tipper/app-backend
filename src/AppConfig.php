@@ -39,6 +39,9 @@ final class AppConfig
     /** Scales every rate limit (tests sign the same users in repeatedly; dev sets this high). */
     private static int $rate_limit_multiplier = 1;
 
+    /** False for apps with no paid tier: account deletion then skips the RevenueCat customer. */
+    private static bool $revenuecat_enabled = true;
+
     /** RevenueCat project id (used to delete a customer with their account). */
     private static string $revenuecat_project_id = '';
 
