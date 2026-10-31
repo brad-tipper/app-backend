@@ -49,6 +49,9 @@ class ProcessAccountDeletionsJob extends RecurringJob
 
     private static function deleteRevenueCatCustomer(string $uuid): void
     {
+        if (!AppConfig::get('revenuecat_enabled')) {
+            return;
+        }
         $key = trim((string) Environment::getEnv('REVENUECAT_V2_SECRET_KEY'));
         $project = trim((string) AppConfig::get('revenuecat_project_id'));
         if ($key === '' || $project === '') {
