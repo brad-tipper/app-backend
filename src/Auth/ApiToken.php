@@ -14,6 +14,7 @@ use SilverStripe\Security\Member;
  * @property int $AccessExpires
  * @property int $RefreshExpires
  * @property string $UserAgent
+ * @property bool $MfaVerified
  * @property int $MemberID
  * @method Member Member()
  */
@@ -27,6 +28,7 @@ class ApiToken extends DataObject
         'AccessExpires' => 'Int',
         'RefreshExpires' => 'Int',
         'UserAgent' => 'Varchar(255)',
+        'MfaVerified' => 'Boolean',
     ];
 
     private static array $has_one = [
