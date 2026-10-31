@@ -5,7 +5,9 @@
   "license": "proprietary",
   "require": {
     "php": "^8.3",
-    "silverstripe/framework": "^6.0"
+    "silverstripe/framework": "^6.0",
+    "symbiote/silverstripe-queuedjobs": "^6",
+    "phptek/sentry": "^6"
   },
   "require-dev": {
     "phpunit/phpunit": "^11.3"

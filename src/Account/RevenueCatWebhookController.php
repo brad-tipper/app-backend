@@ -114,10 +114,9 @@ class RevenueCatWebhookController extends ApiController
     private function matchesPro(array $event): bool
     {
         $entitlements = (array) (self::config()->get('entitlement_ids') ?? []);
-        $fromEnv = array_filter(array_map('trim', explode(',', (string) Environment::getEnv('REVENUECAT_ENTITLEMENT_IDS'))));
-        $products = array_merge((array) self::config()->get('product_ids'), array_filter(array_map('trim', explode(',', (string) Environment::getEnv('REVENUECAT_PRODUCT_IDS')))));
+        $products = (array) self::config()->get('product_ids');
         $held = (array) ($event['entitlement_ids'] ?? []);
-        return array_intersect(array_merge($entitlements, $fromEnv), $held) !== []
+        return array_intersect($entitlements, $held) !== []
             || in_array($event['product_id'] ?? null, $products, true);
     }
 }

@@ -2,10 +2,10 @@
 
 namespace BradTipper\AppBackend\Api;
 
+use BradTipper\AppBackend\AppConfig;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Middleware\HTTPMiddleware;
-use SilverStripe\Core\Environment;
 
 /**
  * CORS for /v1/*. Bearer tokens (no cookies) mean `*` is safe, but a comma
@@ -30,11 +30,11 @@ class CorsMiddleware implements HTTPMiddleware
 
     private function decorate(HTTPRequest $request, HTTPResponse $response): void
     {
-        $configured = trim((string) Environment::getEnv('API_CORS_ORIGINS'));
+        $allowed = AppConfig::list('cors_origins');
         $origin = $request->getHeader('Origin');
-        if ($configured === '' || $configured === '*') {
+        if ($allowed === [] || in_array('*', $allowed, true)) {
             $response->addHeader('Access-Control-Allow-Origin', '*');
-        } elseif ($origin && in_array($origin, array_map('trim', explode(',', $configured)), true)) {
+        } elseif ($origin && in_array($origin, $allowed, true)) {
             $response->addHeader('Access-Control-Allow-Origin', $origin);
             $response->addHeader('Vary', 'Origin');
         }

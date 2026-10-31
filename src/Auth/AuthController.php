@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Auth;
 
+use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
@@ -12,7 +13,6 @@ use BradTipper\AppBackend\Support\Totp;
 use BradTipper\AppBackend\Support\Turnstile;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Environment;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
 use SilverStripe\Security\Security;
@@ -383,7 +383,7 @@ class AuthController extends ApiController
         $secret = Totp::generateSecret();
         $member->TotpPendingSecret = Secrets::encrypt($secret);
         $member->write();
-        $issuer = (string) (Environment::getEnv('APP_NAME') ?: 'App');
+        $issuer = (string) AppConfig::get('name');
         return ['secret' => $secret, 'otpauthUri' => Totp::uri($secret, $member->Email, $issuer)];
     }
 
@@ -517,7 +517,7 @@ class AuthController extends ApiController
     /** @param array<string, string> $query */
     private function buildLink(?string $redirectUrl, string $fallbackPath, array $query): string
     {
-        $base = $redirectUrl ?? rtrim((string) Environment::getEnv('APP_WEB_URL'), '/') . $fallbackPath;
+        $base = $redirectUrl ?? rtrim((string) AppConfig::get('web_url'), '/') . $fallbackPath;
         return $base . (str_contains($base, '?') ? '&' : '?') . http_build_query($query);
     }
 

@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Auth;
 
+use BradTipper\AppBackend\AppConfig;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Security\Member;
@@ -16,9 +17,6 @@ final class SessionService
     private static int $refresh_ttl = 5184000;
 
     private static bool $require_email_confirmation = false;
-
-    /** @var string[] */
-    private static array $allowed_redirect_origins = [];
 
     /** @return array{accessToken: string, refreshToken: string, expiresAt: string, user: array<string, mixed>} */
     public static function start(Member $member, ?HTTPRequest $request = null): array
@@ -94,16 +92,19 @@ final class SessionService
     public static function isAllowedRedirect(string $url): bool
     {
         $parts = parse_url($url);
-        if (!$parts || empty($parts['scheme']) || empty($parts['host'])) {
-            // App deep links such as myapp://reset-password carry only a scheme and host.
+        if (!$parts || empty($parts['scheme'])) {
+            return false;
+        }
+        // Native deep links such as myapp://reset-password are allowed by scheme.
+        if (in_array(strtolower($parts['scheme']), AppConfig::list('redirect_schemes'), true)) {
+            return true;
+        }
+        if (empty($parts['host'])) {
             return false;
         }
         $origin = $parts['scheme'] . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
-        $allowed = (array) self::config()->get('allowed_redirect_origins');
-        $fromEnv = trim((string) \SilverStripe\Core\Environment::getEnv('APP_REDIRECT_ORIGINS'));
-        if ($fromEnv !== '') {
-            $allowed = array_merge($allowed, array_map('trim', explode(',', $fromEnv)));
-        }
+        $allowed = AppConfig::list('redirect_origins');
+        $allowed[] = rtrim((string) AppConfig::get('web_url'), '/');
         return in_array($origin, $allowed, true);
     }
 

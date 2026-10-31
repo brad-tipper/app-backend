@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Account;
 
+use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
@@ -12,7 +13,6 @@ use BradTipper\AppBackend\Model\RevenueCatEvent;
 use BradTipper\AppBackend\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Core\Environment;
 
 /** Data export and the 30-day account deletion request. */
 class AccountController extends ApiController
@@ -38,7 +38,7 @@ class AccountController extends ApiController
 
         $data = [
             'exportedAt' => gmdate(DATE_ATOM),
-            'dataController' => (string) (Environment::getEnv('APP_NAME') ?: 'App'),
+            'dataController' => (string) AppConfig::get('name'),
             'user' => $member->toApiUser(),
             'contactSubmissions' => array_map($this->submissionRow(...), ContactSubmission::get()->filter('Email', $member->Email)->toArray()),
             'feedbackSubmissions' => array_map($this->submissionRow(...), FeedbackSubmission::get()->filter('MemberID', $member->ID)->toArray()),

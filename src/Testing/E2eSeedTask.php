@@ -55,63 +55,8 @@ class E2eSeedTask extends BuildTask
             return Command::FAILURE;
         }
 
-        $this->reset();
-
-        $results = [];
-        foreach ($users as $spec) {
-            $results[$spec['email']] = $this->createUser($spec);
-        }
+        $results = E2eSeeder::run($users);
         $output->writeln('E2E_SEED_RESULT ' . json_encode($results, JSON_UNESCAPED_SLASHES));
         return Command::SUCCESS;
-    }
-
-    private function reset(): void
-    {
-        $admin = DefaultAdminService::singleton()->findOrCreateDefaultAdmin();
-        // Deleting a member cascades to everything it owns (see ApiMemberExtension).
-        foreach (Member::get()->exclude('ID', $admin->ID) as $member) {
-            $member->delete();
-        }
-        foreach ([ApiToken::class, AuthChallenge::class, ContactSubmission::class, FeedbackSubmission::class, RevenueCatEvent::class, RateLimitBucket::class] as $class) {
-            $class::get()->removeAll();
-        }
-    }
-
-    /** @param array<string, mixed> $spec @return array<string, mixed> */
-    private function createUser(array $spec): array
-    {
-        $member = Member::create();
-        $member->Email = strtolower($spec['email']);
-        $member->Password = $spec['password'];
-        $member->setApiName($spec['name'] ?? '');
-        $member->EmailConfirmedAt = gmdate('Y-m-d H:i:s');
-        if (!empty($spec['preferences'])) {
-            $member->setPreferences($spec['preferences']);
-        }
-        $member->write();
-        $member->extend('onAfterApiSignUp');
-
-        $result = ['id' => $member->UUID];
-        if (($spec['tier'] ?? 'free') === 'pro') {
-            // Same code path as the RevenueCat webhook.
-            $member->applySubscriptionEvent('active', time());
-        }
-        if (!empty($spec['totp'])) {
-            $secret = Totp::generateSecret();
-            $codes = [];
-            $hashes = [];
-            for ($i = 0; $i < 10; $i++) {
-                $raw = strtoupper(bin2hex(random_bytes(5)));
-                $codes[] = substr($raw, 0, 5) . '-' . substr($raw, 5);
-                $hashes[] = hash('sha256', $raw);
-            }
-            $member->TotpSecret = Secrets::encrypt($secret);
-            $member->TotpEnabled = true;
-            $member->RecoveryCodes = json_encode($hashes);
-            $member->write();
-            $result['totpSecret'] = $secret;
-            $result['recoveryCodes'] = $codes;
-        }
-        return $result;
     }
 }

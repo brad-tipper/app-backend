@@ -2,16 +2,27 @@
 
 namespace BradTipper\AppBackend\Support;
 
+use BradTipper\AppBackend\AppConfig;
+use BradTipper\AppBackend\Jobs\Queue;
 use SilverStripe\Control\Email\Email;
-use SilverStripe\Core\Environment;
 
 final class Mailer
 {
-    /** Sends a plain transactional email through Silverstripe's configured mailer. */
+    /**
+     * Queues a plain transactional email. It is delivered by a queued job straight
+     * away, so a mail server hiccup is retried and never fails the API request.
+     */
     public static function send(string $to, string $subject, string $text): void
     {
-        $from = (string) (Environment::getEnv('APP_MAIL_FROM') ?: Email::config()->get('admin_email') ?: 'no-reply@localhost');
-        $email = Email::create($from, $to, $subject);
+        Queue::dispatch(self::class, 'deliver', [$to, $subject, $text], Queue::NOW, 0, "Email: {$subject}");
+    }
+
+    /** The job body: hands the message to Silverstripe's configured mailer. */
+    public static function deliver(string $to, string $subject, string $text): void
+    {
+        $address = (string) AppConfig::get('mail_from_address');
+        $name = (string) AppConfig::get('mail_from_name');
+        $email = Email::create($name !== '' ? [$address => $name] : $address, $to, $subject);
         $email->text($text);
         $email->send();
     }

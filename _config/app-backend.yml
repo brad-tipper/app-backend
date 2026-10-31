@@ -10,6 +10,7 @@ SilverStripe\Control\Director:
     'v1/feedback': BradTipper\AppBackend\Account\FeedbackController
     'v1/account//$Action': BradTipper\AppBackend\Account\AccountController
     'v1/webhooks/revenuecat': BradTipper\AppBackend\Account\RevenueCatWebhookController
+    'v1/_e2e/seed': BradTipper\AppBackend\Testing\E2eSeedController
 ---
 Name: app-backend-middleware
 ---
@@ -30,6 +31,14 @@ SilverStripe\Security\Validation\RulesPasswordValidator:
   min_length: 12
   min_test_score: 4
 ---
+Name: app-backend-mailer
+After: '#mailer'
+---
+# SMTP settings come from the project's app/_config/smtp.yml; the password is the SMTP_PASSWORD env var.
+SilverStripe\Core\Injector\Injector:
+  Symfony\Component\Mailer\Transport\TransportInterface:
+    factory: BradTipper\AppBackend\Support\SmtpTransportFactory
+---
 Name: app-backend-member
 ---
 SilverStripe\Security\Member:
@@ -45,8 +54,6 @@ BradTipper\AppBackend\Auth\SessionService:
   access_ttl: 3600
   refresh_ttl: 5184000
   require_email_confirmation: false
-  # Origins a client may name as `redirectUrl` in emailed links (also APP_REDIRECT_ORIGINS).
-  allowed_redirect_origins: []
 BradTipper\AppBackend\Account\AccountController:
   deletion_grace_days: 30
 BradTipper\AppBackend\Account\RevenueCatWebhookController:
@@ -54,3 +61,12 @@ BradTipper\AppBackend\Account\RevenueCatWebhookController:
   entitlement_ids:
     - pro
   product_ids: []
+---
+Name: app-backend-jobs
+---
+Symbiote\QueuedJobs\DataObjects\QueuedJobDescriptor:
+  extensions:
+    - BradTipper\AppBackend\Jobs\SchedulerExtension
+BradTipper\AppBackend\Jobs\Scheduler:
+  jobs:
+    - BradTipper\AppBackend\Account\ProcessAccountDeletionsJob
