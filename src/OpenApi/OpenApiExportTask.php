@@ -2,9 +2,9 @@
 
 namespace BradTipper\AppBackend\OpenApi;
 
+use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Api\ApiController;
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\Core\Environment;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\PolyExecution\PolyOutput;
 use Symfony\Component\Console\Command\Command;
@@ -46,7 +46,7 @@ class OpenApiExportTask extends BuildTask
 
     public static function build(string $title = 'App API'): Spec
     {
-        $server = (string) (Environment::getEnv('API_PUBLIC_URL') ?: 'http://localhost');
+        $server = (string) AppConfig::get('public_url');
         $spec = new Spec($title, '1.0.0', $server);
         CommonSchemas::register($spec);
 
