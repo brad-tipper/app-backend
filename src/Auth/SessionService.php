@@ -19,7 +19,7 @@ final class SessionService
     private static bool $require_email_confirmation = false;
 
     /** @return array{accessToken: string, refreshToken: string, expiresAt: string, user: array<string, mixed>} */
-    public static function start(Member $member, ?HTTPRequest $request = null): array
+    public static function start(Member $member, ?HTTPRequest $request = null, bool $mfaVerified = false): array
     {
         // Prune sessions whose refresh token has expired.
         if (random_int(1, 50) === 1) {
@@ -35,6 +35,7 @@ final class SessionService
             'AccessExpires' => $accessExpires,
             'RefreshExpires' => time() + (int) self::config()->get('refresh_ttl'),
             'UserAgent' => $request ? mb_substr((string) $request->getHeader('User-Agent'), 0, 255) : '',
+            'MfaVerified' => $mfaVerified,
             'MemberID' => $member->ID,
         ])->write();
 
@@ -44,6 +45,13 @@ final class SessionService
             'expiresAt' => gmdate(DATE_ATOM, $accessExpires),
             'user' => $member->toApiUser(),
         ];
+    }
+
+    public static function tokenForAccessToken(string $token): ?ApiToken
+    {
+        /** @var ApiToken|null $row */
+        $row = ApiToken::get()->filter('AccessHash', hash('sha256', $token))->first();
+        return $row && $row->AccessExpires >= time() ? $row : null;
     }
 
     public static function memberForAccessToken(string $token): ?Member
@@ -69,8 +77,9 @@ final class SessionService
         if (!$member->exists()) {
             return null;
         }
+        $verified = (bool) $row->MfaVerified;
         $row->delete();
-        return self::start($member, $request);
+        return self::start($member, $request, $verified);
     }
 
     public static function revokeAccessToken(string $token): void

@@ -371,7 +371,7 @@ class AuthController extends ApiController
             throw ApiException::unauthorized('That code is not correct.', 'invalid_mfa_code');
         }
         $challenge->markUsed();
-        return $this->authResult(SessionService::start($member, $request));
+        return $this->authResult(SessionService::start($member, $request, true));
     }
 
     protected function doMfaEnroll(HTTPRequest $request): array
@@ -415,31 +415,33 @@ class AuthController extends ApiController
         $member->TotpEnabled = true;
         $member->RecoveryCodes = json_encode($hashed);
         $member->write();
+        // The session that just proved possession of the authenticator counts as MFA-verified.
+        $token = SessionService::tokenForAccessToken((string) $this->bearerToken($request));
+        if ($token) {
+            $token->MfaVerified = true;
+            $token->write();
+        }
         return ['recoveryCodes' => $plain];
     }
 
+    /** Needs a session that already passed the second factor (the old "aal2" rule). */
     protected function doMfaDisable(HTTPRequest $request): array
     {
         $member = $this->requireMember($request);
-        $in = Input::fromRequest($request);
-        $password = $in->password('password');
-        $code = $in->string('code', true, 32);
-        $in->assertValid();
-
-        $this->limit("mfa-disable:{$member->ID}", 10, 900);
-        $result = ValidationResult::create();
-        $verified = (new MemberAuthenticator())->authenticate(['Email' => $member->Email, 'Password' => $password], $request, $result);
-        if (!$verified || $verified->ID !== $member->ID) {
-            throw ApiException::forbidden('Password is incorrect.', 'invalid_credentials');
-        }
-        if (!$this->verifyTotp($member, $code) && !$this->consumeRecoveryCode($member, $code)) {
-            throw ApiException::forbidden('That code is not correct.', 'invalid_mfa_code');
+        $token = SessionService::tokenForAccessToken((string) $this->bearerToken($request));
+        if (!$token || !$token->MfaVerified) {
+            throw ApiException::forbidden('Verify your authenticator code first.', 'mfa_required');
         }
         $member->TotpEnabled = false;
         $member->TotpSecret = '';
         $member->TotpPendingSecret = '';
         $member->RecoveryCodes = '';
         $member->write();
+        // Remaining sessions no longer carry a second factor.
+        ApiToken::get()->filter('MemberID', $member->ID)->each(function (ApiToken $t) {
+            $t->MfaVerified = false;
+            $t->write();
+        });
         return ['ok' => true];
     }
 
@@ -579,7 +581,6 @@ class AuthController extends ApiController
         $spec->schema('MfaEnrollment', Spec::object(['secret' => $s(), 'otpauthUri' => $s()]));
         $spec->schema('MfaConfirmRequest', Spec::object(['code' => $s()]));
         $spec->schema('MfaRecoveryCodes', Spec::object(['recoveryCodes' => Spec::arrayOf($s())]));
-        $spec->schema('MfaDisableRequest', Spec::object(['password' => $s(), 'code' => $s()]));
         $spec->schema('UpdateProfileRequest', Spec::object([
             'name' => $s(),
             'firstName' => $s(),
@@ -618,6 +619,6 @@ class AuthController extends ApiController
         $op('post', 'mfa/verify', 'verifyMfa', 'Finish a two-factor sign-in', 'MfaVerifyRequest', $result);
         $op('post', 'mfa/enroll', 'enrollMfa', 'Begin two-factor enrolment', null, Spec::ref('MfaEnrollment'), true);
         $op('post', 'mfa/enroll/confirm', 'confirmMfaEnrollment', 'Confirm enrolment with a code', 'MfaConfirmRequest', Spec::ref('MfaRecoveryCodes'), true);
-        $op('post', 'mfa/disable', 'disableMfa', 'Turn off two-factor authentication', 'MfaDisableRequest', $ok, true);
+        $op('post', 'mfa/disable', 'disableMfa', 'Turn off two-factor authentication (needs an MFA-verified session)', null, $ok, true);
     }
 }
