@@ -30,6 +30,17 @@ class CorsMiddleware implements HTTPMiddleware
 
     private function decorate(HTTPRequest $request, HTTPResponse $response): void
     {
+        // All /v1 responses are data, never HTML documents. Keep the headers here
+        // so custom controllers, error paths, and preflight replies stay aligned.
+        if (!$response->getHeader('Cache-Control')) {
+            $response->addHeader('Cache-Control', 'no-store');
+        }
+        $response->addHeader('X-Content-Type-Options', 'nosniff');
+        $response->addHeader('X-Frame-Options', 'DENY');
+        $response->addHeader('Referrer-Policy', 'no-referrer');
+        $response->addHeader('Permissions-Policy', 'camera=(), geolocation=(), microphone=()');
+        $response->addHeader('Content-Security-Policy', "default-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+
         $allowed = AppConfig::list('cors_origins');
         $origin = $request->getHeader('Origin');
         if ($allowed === [] || in_array('*', $allowed, true)) {
