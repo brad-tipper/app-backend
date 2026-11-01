@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Account;
 
+use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Uuid;
@@ -52,7 +53,7 @@ class RevenueCatWebhookController extends ApiController
     {
         $this->requireMethod($request, 'POST');
 
-        $secret = trim((string) Environment::getEnv('REVENUECAT_WEBHOOK_SECRET'));
+        $secret = trim((string) AppConfig::secret('revenuecat_webhook_secret'));
         $supplied = (string) $this->bearerToken($request);
         if ($secret === '' || !hash_equals($secret, $supplied)) {
             throw ApiException::unauthorized('Unauthorized.');

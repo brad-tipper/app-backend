@@ -7,7 +7,9 @@ use SilverStripe\Core\Config\Configurable;
 /**
  * Non-secret, per-app settings. Set them in the project's `app/_config/app.yml`
  * (use `Only: environment: dev|live` fragments for per-environment values).
- * Secrets never live here - they are environment variables.
+ * Secrets (below) are also set in yml, in `Only: environment: live` fragments that
+ * the private repo commits; only database details stay in `.env`. A secret left
+ * empty in yml falls back to the same-named environment variable (deprecated).
  */
 final class AppConfig
 {
@@ -45,9 +47,31 @@ final class AppConfig
     /** RevenueCat project id (used to delete a customer with their account). */
     private static string $revenuecat_project_id = '';
 
+    /** Secrets. Empty by default; set in yml (live values in a `live` fragment). */
+    private static string $app_key = '';
+
+    private static string $smtp_password = '';
+
+    private static string $mailer_dsn = '';
+
+    private static string $turnstile_secret_key = '';
+
+    private static string $revenuecat_webhook_secret = '';
+
+    private static string $revenuecat_v2_secret_key = '';
+
+    private static string $e2e_seed_secret = '';
+
     public static function get(string $key): mixed
     {
         return self::config()->get($key);
+    }
+
+    /** A secret from yml, else the deprecated same-named environment variable (upper case). */
+    public static function secret(string $key): string
+    {
+        $value = trim((string) self::config()->get($key));
+        return $value !== '' ? $value : trim((string) Environment::getEnv(strtoupper($key)));
     }
 
     /** @return string[] */

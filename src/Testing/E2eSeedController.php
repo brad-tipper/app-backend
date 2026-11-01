@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Testing;
 
+use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
@@ -17,7 +18,7 @@ class E2eSeedController extends ApiController
 {
     protected function dispatch(HTTPRequest $request): array
     {
-        $secret = (string) Environment::getEnv('E2E_SEED_SECRET');
+        $secret = (string) AppConfig::secret('e2e_seed_secret');
         if (Environment::getEnv('SS_ENVIRONMENT_TYPE') !== 'dev' || $secret === '') {
             throw ApiException::notFound();
         }

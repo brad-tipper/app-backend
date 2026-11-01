@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Support;
 
+use BradTipper\AppBackend\AppConfig;
 use SilverStripe\Core\Environment;
 
 /** Cloudflare Turnstile server-side verification. */
@@ -9,7 +10,7 @@ final class Turnstile
 {
     public static function verify(?string $token, string $remoteIp): bool
     {
-        $secret = trim((string) Environment::getEnv('TURNSTILE_SECRET_KEY'));
+        $secret = trim((string) AppConfig::secret('turnstile_secret_key'));
         if ($secret === '') {
             // Unconfigured: only acceptable outside live environments.
             return Environment::getEnv('SS_ENVIRONMENT_TYPE') !== 'live';

@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Support;
 
+use BradTipper\AppBackend\AppConfig;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Environment;
 use SilverStripe\Core\Injector\Factory;
@@ -31,7 +32,7 @@ class SmtpTransportFactory implements Factory
 
     public static function dsn(): ?string
     {
-        $override = trim((string) Environment::getEnv('MAILER_DSN'));
+        $override = trim((string) AppConfig::secret('mailer_dsn'));
         if ($override !== '') {
             return $override;
         }
@@ -41,7 +42,7 @@ class SmtpTransportFactory implements Factory
             return null;
         }
         $username = (string) $config->get('username');
-        $password = (string) Environment::getEnv('SMTP_PASSWORD');
+        $password = (string) AppConfig::secret('smtp_password');
         $auth = $username !== '' ? rawurlencode($username) . ($password !== '' ? ':' . rawurlencode($password) : '') . '@' : '';
         return sprintf('%s://%s%s:%d', $config->get('scheme'), $auth, $host, (int) $config->get('port'));
     }

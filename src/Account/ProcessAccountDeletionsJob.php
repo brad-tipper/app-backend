@@ -52,7 +52,7 @@ class ProcessAccountDeletionsJob extends RecurringJob
         if (!AppConfig::get('revenuecat_enabled')) {
             return;
         }
-        $key = trim((string) Environment::getEnv('REVENUECAT_V2_SECRET_KEY'));
+        $key = trim((string) AppConfig::secret('revenuecat_v2_secret_key'));
         $project = trim((string) AppConfig::get('revenuecat_project_id'));
         if ($key === '' || $project === '') {
             // A paying customer must never be orphaned in live, so retry instead.
