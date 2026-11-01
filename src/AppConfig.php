@@ -3,6 +3,7 @@
 namespace BradTipper\AppBackend;
 
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Environment;
 
 /**
  * Non-secret, per-app settings. Set them in the project's `app/_config/app.yml`
