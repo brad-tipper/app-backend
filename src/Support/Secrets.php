@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Support;
 
+use BradTipper\AppBackend\AppConfig;
 use SilverStripe\Core\Environment;
 
 /**
@@ -30,7 +31,7 @@ final class Secrets
 
     private static function key(): string
     {
-        $configured = (string) Environment::getEnv('APP_KEY');
+        $configured = (string) AppConfig::secret('app_key');
         if ($configured !== '') {
             $key = base64_decode($configured, true);
             if ($key !== false && strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {
