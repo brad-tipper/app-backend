@@ -70,6 +70,9 @@ final class AppConfig
 
     private static string $turnstile_secret_key = '';
 
+    /** Automated tests present this in place of a Turnstile token. Never honoured in live; set only in preview/dev fragments. */
+    private static string $e2e_captcha_token = '';
+
     private static string $revenuecat_webhook_secret = '';
 
     private static string $revenuecat_v2_secret_key = '';

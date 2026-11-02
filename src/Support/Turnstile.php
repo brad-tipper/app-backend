@@ -10,6 +10,11 @@ final class Turnstile
 {
     public static function verify(?string $token, string $remoteIp): bool
     {
+        // Test runs against a preview stack cannot solve a challenge; they present a shared token instead.
+        $testToken = trim((string) AppConfig::get('e2e_captcha_token'));
+        if ($testToken !== '' && $token && Environment::getEnv('SS_ENVIRONMENT_TYPE') !== 'live' && hash_equals($testToken, $token)) {
+            return true;
+        }
         $secret = trim((string) AppConfig::secret('turnstile_secret_key'));
         if ($secret === '') {
             // Unconfigured: only acceptable outside live environments.
