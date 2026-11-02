@@ -7,6 +7,7 @@ use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
 use BradTipper\AppBackend\Auth\ApiMemberExtension;
+use BradTipper\AppBackend\Support\Notifications;
 use BradTipper\AppBackend\Model\ContactSubmission;
 use BradTipper\AppBackend\Model\FeedbackSubmission;
 use BradTipper\AppBackend\Model\RevenueCatEvent;
@@ -94,6 +95,7 @@ class AccountController extends ApiController
             $member->DeletionRequestedAt = gmdate('Y-m-d H:i:s');
             $member->ScheduledForDeletionAt = gmdate('Y-m-d H:i:s', strtotime("+{$days} days"));
             $member->write();
+            Notifications::deletionScheduled($member, (string) $member->ScheduledForDeletionAt . ' UTC');
         }
         return $this->deletionPayload($member);
     }
@@ -101,9 +103,13 @@ class AccountController extends ApiController
     protected function doCancelDeletion(HTTPRequest $request): array
     {
         $member = $this->requireMember($request);
+        $wasScheduled = (bool) $member->ScheduledForDeletionAt;
         $member->DeletionRequestedAt = null;
         $member->ScheduledForDeletionAt = null;
         $member->write();
+        if ($wasScheduled) {
+            Notifications::deletionCancelled($member);
+        }
         return $this->deletionPayload($member);
     }
 

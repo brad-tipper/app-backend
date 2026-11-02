@@ -9,6 +9,7 @@ use BradTipper\AppBackend\Api\Uuid;
 use BradTipper\AppBackend\Auth\ApiMemberExtension;
 use BradTipper\AppBackend\Model\RevenueCatEvent;
 use BradTipper\AppBackend\OpenApi\Spec;
+use BradTipper\AppBackend\Support\Notifications;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Environment;
@@ -40,6 +41,7 @@ class RevenueCatWebhookController extends ApiController
             'processed' => Spec::boolean(),
             'outcome' => Spec::string(),
             'subscriptionStatus' => Spec::string(),
+            'notified' => Spec::boolean(),
         ], ['ok', 'processed']));
         $spec->operation('post', '/v1/webhooks/revenuecat', 'revenueCatWebhook', [
             'tags' => ['Webhooks'],
@@ -85,11 +87,18 @@ class RevenueCatWebhookController extends ApiController
             return ['ok' => true, 'processed' => false, 'outcome' => 'ignored_duplicate'];
         }
 
-        if ($status) {
-            $member = ApiMemberExtension::findByUuid((string) $event['app_user_id']);
-            if ($member) {
-                $member->applySubscriptionEvent($status, $eventTs);
-            }
+        $member = ($status || $sameEnvironment) ? ApiMemberExtension::findByUuid((string) $event['app_user_id']) : null;
+        if ($status && $member) {
+            $member->applySubscriptionEvent($status, $eventTs);
+        }
+
+        // Access (above) is only ever changed by the status events. Cancellation,
+        // billing trouble and the like change nothing about access, but the member
+        // should hear about them, so they are emailed here. A duplicate event never
+        // reaches this point, so each event is emailed at most once.
+        $notified = false;
+        if ($member && $sameEnvironment && ($matches || $event['type'] === 'EXPIRATION')) {
+            $notified = Notifications::subscription($member, $event);
         }
 
         RevenueCatEvent::create([
@@ -100,7 +109,7 @@ class RevenueCatWebhookController extends ApiController
             'Environment' => (string) $event['environment'],
             'ProductId' => (string) ($event['product_id'] ?? ''),
             'EntitlementIds' => json_encode($event['entitlement_ids'] ?? []),
-            'Outcome' => $status ? 'applied' : 'ignored_unmatched',
+            'Outcome' => $status ? 'applied' : ($notified ? 'notified' : 'ignored_unmatched'),
             'AppliedTier' => $status === 'active' ? 'pro' : ($status === 'unsubscribed' ? 'free' : ''),
         ])->write();
 
@@ -108,6 +117,7 @@ class RevenueCatWebhookController extends ApiController
             'ok' => true,
             'processed' => $status !== null,
             'subscriptionStatus' => $status ?? 'unchanged',
+            'notified' => $notified,
         ];
     }
 

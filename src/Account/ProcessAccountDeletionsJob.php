@@ -4,6 +4,7 @@ namespace BradTipper\AppBackend\Account;
 
 use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Jobs\RecurringJob;
+use BradTipper\AppBackend\Support\Notifications;
 use SilverStripe\Core\Environment;
 use SilverStripe\Security\Member;
 
@@ -36,9 +37,13 @@ class ProcessAccountDeletionsJob extends RecurringJob
         $deleted = 0;
         foreach ($due as $member) {
             try {
+                $email = trim((string) $member->Email);
                 self::deleteRevenueCatCustomer($member->UUID);
                 $member->extend('onAccountDeletion');
                 $member->delete();
+                if ($email !== '') {
+                    Notifications::accountDeleted($email);
+                }
                 $deleted++;
             } catch (\Throwable $e) {
                 $this->addMessage("Could not delete {$member->UUID}: {$e->getMessage()}", 'ERROR');

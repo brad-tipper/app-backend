@@ -8,6 +8,7 @@ use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
 use BradTipper\AppBackend\OpenApi\Spec;
 use BradTipper\AppBackend\Support\Mailer;
+use BradTipper\AppBackend\Support\Notifications;
 use BradTipper\AppBackend\Support\Secrets;
 use BradTipper\AppBackend\Support\Totp;
 use BradTipper\AppBackend\Support\Turnstile;
@@ -101,6 +102,7 @@ class AuthController extends ApiController
         }
         $member->EmailConfirmedAt = gmdate('Y-m-d H:i:s');
         $member->write();
+        Notifications::welcome($member);
         return $this->authResult(SessionService::start($member, $request));
     }
 
@@ -216,11 +218,12 @@ class AuthController extends ApiController
         $member = ApiMemberExtension::findByEmail($email);
         if ($member) {
             $token = AuthChallenge::issue($member, AuthChallenge::RESET, self::RESET_TTL);
-            Mailer::send($email, 'Reset your password', $this->linkMessage(
-                'You asked to reset your password.',
-                $this->buildLink($redirectUrl, '/reset-password', ['token' => $token]),
-                'This link works for one hour. If you did not ask for this, you can ignore this email.',
-            ));
+            Mailer::notify($email, 'Reset your password', [
+                'heading' => 'Reset your password',
+                'paragraphs' => ['You asked to reset your password. Use the button below to choose a new one.'],
+                'button' => ['label' => 'Reset password', 'url' => $this->buildLink($redirectUrl, '/reset-password', ['token' => $token])],
+                'footnote' => 'This link works for one hour. If you did not ask for this, you can ignore this email.',
+            ]);
         }
         return ['ok' => true];
     }
@@ -244,6 +247,7 @@ class AuthController extends ApiController
         }
         $challenge->markUsed();
         SessionService::revokeAll($member);
+        Notifications::passwordChanged($member);
         return ['ok' => true];
     }
 
@@ -266,6 +270,7 @@ class AuthController extends ApiController
             throw ApiException::validation($this->resultErrors($result, 'newPassword'));
         }
         SessionService::revokeAll($member, $this->bearerToken($request));
+        Notifications::passwordChanged($member);
         return ['ok' => true];
     }
 
@@ -285,11 +290,12 @@ class AuthController extends ApiController
         $member = ApiMemberExtension::findByEmail($email);
         if ($member) {
             $token = AuthChallenge::issue($member, AuthChallenge::MAGIC, self::MAGIC_TTL);
-            Mailer::send($email, 'Your sign-in link', $this->linkMessage(
-                'Use this link to sign in.',
-                $this->buildLink($redirectUrl, '/auth/callback', ['token' => $token, 'type' => 'magiclink']),
-                'This link works for 15 minutes and can be used once.',
-            ));
+            Mailer::notify($email, 'Your sign-in link', [
+                'heading' => 'Your sign-in link',
+                'paragraphs' => ['Use the button below to sign in. No password needed.'],
+                'button' => ['label' => 'Sign in', 'url' => $this->buildLink($redirectUrl, '/auth/callback', ['token' => $token, 'type' => 'magiclink'])],
+                'footnote' => 'This link works for 15 minutes and can be used once. If you did not ask for it, ignore this email.',
+            ]);
         }
         return ['ok' => true];
     }
@@ -321,8 +327,12 @@ class AuthController extends ApiController
             throw ApiException::badRequest('This confirmation link is invalid or has expired.', 'invalid_token');
         }
         $member = $challenge->Member();
+        $firstConfirmation = !$member->EmailConfirmedAt;
         $member->EmailConfirmedAt = gmdate('Y-m-d H:i:s');
         $member->write();
+        if ($firstConfirmation) {
+            Notifications::welcome($member);
+        }
         return $this->completeSignIn($member, $request);
     }
 
@@ -421,6 +431,7 @@ class AuthController extends ApiController
             $token->MfaVerified = true;
             $token->write();
         }
+        Notifications::mfaEnabled($member);
         return ['recoveryCodes' => $plain];
     }
 
@@ -442,6 +453,7 @@ class AuthController extends ApiController
             $t->MfaVerified = false;
             $t->write();
         });
+        Notifications::mfaDisabled($member);
         return ['ok' => true];
     }
 
@@ -493,11 +505,12 @@ class AuthController extends ApiController
     private function sendConfirmation(Member $member, ?string $redirectUrl): void
     {
         $token = AuthChallenge::issue($member, AuthChallenge::CONFIRM, self::CONFIRM_TTL);
-        Mailer::send($member->Email, 'Confirm your email address', $this->linkMessage(
-            'Confirm your email address to finish creating your account.',
-            $this->buildLink($redirectUrl, '/auth/callback', ['token' => $token, 'type' => 'signup']),
-            'If you did not create an account, you can ignore this email.',
-        ));
+        Mailer::notify($member->Email, 'Confirm your email address', [
+            'heading' => 'Confirm your email address',
+            'paragraphs' => ['Confirm your email address to finish creating your account.'],
+            'button' => ['label' => 'Confirm email', 'url' => $this->buildLink($redirectUrl, '/auth/callback', ['token' => $token, 'type' => 'signup'])],
+            'footnote' => 'If you did not create an account, you can ignore this email.',
+        ]);
     }
 
     private function requireCaptcha(?string $token, string $ip): void
@@ -521,11 +534,6 @@ class AuthController extends ApiController
     {
         $base = $redirectUrl ?? rtrim((string) AppConfig::get('web_url'), '/') . $fallbackPath;
         return $base . (str_contains($base, '?') ? '&' : '?') . http_build_query($query);
-    }
-
-    private function linkMessage(string $intro, string $link, string $outro): string
-    {
-        return "{$intro}\n\n{$link}\n\n{$outro}\n";
     }
 
     /** @return array<string, string[]> */

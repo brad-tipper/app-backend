@@ -39,6 +39,19 @@ final class AppConfig
 
     private static string $mail_from_name = '';
 
+    /** Email branding: the button/heading colour, the text colour on it, and a PNG logo URL. */
+    private static string $brand_color = '#2f4c63';
+
+    private static string $brand_color_text = '#ffffff';
+
+    private static string $brand_logo_url = '';
+
+    /** Path of the web app's subscription screen, linked from billing emails. */
+    private static string $subscription_path = '/subscription';
+
+    /** Where replies and "contact us" links go; empty falls back to the sender address. */
+    private static string $support_email = '';
+
     /** Scales every rate limit (tests sign the same users in repeatedly; dev sets this high). */
     private static int $rate_limit_multiplier = 1;
 
