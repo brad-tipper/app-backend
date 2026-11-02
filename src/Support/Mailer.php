@@ -5,6 +5,7 @@ namespace BradTipper\AppBackend\Support;
 use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Jobs\Queue;
 use SilverStripe\Control\Email\Email;
+use SilverStripe\Core\Environment;
 
 final class Mailer
 {
@@ -30,6 +31,9 @@ final class Mailer
     /** The job body: hands the message to Silverstripe's configured mailer. */
     public static function deliver(string $to, string $subject, string $text): void
     {
+        if (self::isReservedTestAddress($to)) {
+            return;
+        }
         $email = self::message($to, $subject);
         $email->text($text);
         $email->send();
@@ -38,6 +42,9 @@ final class Mailer
     /** @param array<string, mixed> $content */
     public static function deliverBranded(string $to, string $subject, array $content): void
     {
+        if (self::isReservedTestAddress($to)) {
+            return;
+        }
         $rendered = EmailTemplate::render($content);
         $email = self::message($to, $subject);
         $email->html($rendered['html']);
@@ -47,6 +54,19 @@ final class Mailer
             $email->setReplyTo($support);
         }
         $email->send();
+    }
+
+    /**
+     * Addresses on the reserved test domains (RFC 2606) can never be delivered. Outside local
+     * development, where Mailpit catches everything, skip them instead of bouncing off the real
+     * mail provider, which is what automated sign-ups against a preview would otherwise do.
+     */
+    private static function isReservedTestAddress(string $to): bool
+    {
+        if (Environment::getEnv('SS_ENVIRONMENT_TYPE') === 'dev') {
+            return false;
+        }
+        return (bool) preg_match('/@(?:[^@]+\.)?(?:example\.(?:com|net|org|test)|test|invalid|localhost)$/i', $to);
     }
 
     private static function message(string $to, string $subject): Email
