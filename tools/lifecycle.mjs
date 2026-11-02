@@ -295,4 +295,9 @@ assert.equal(reset.status, 200);
 await expectMail("Reset your password");
 ok("forgot password sends the reset email");
 
+// Leave the throwaway account scheduled for deletion so a shared preview does not fill up with test users.
+r = await call("POST", "/v1/account/deletion", { token, body: { confirmation: "DELETE", email } });
+assert.equal(r.status, 200, JSON.stringify(r.json));
+ok("the test account is left scheduled for deletion");
+
 console.log(`\nlifecycle: ${step} checks passed against ${base}`);
