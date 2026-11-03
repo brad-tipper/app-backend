@@ -22,8 +22,8 @@ final class EmailTemplate
     public static function render(array $content): array
     {
         $name = (string) AppConfig::get('name');
-        $color = self::color((string) AppConfig::get('brand_color'), '#2f4c63');
-        $onColor = self::color((string) AppConfig::get('brand_color_text'), '#ffffff');
+        $color = self::safeColor((string) AppConfig::get('brand_color'), '#2f4c63');
+        $onColor = self::safeColor((string) AppConfig::get('brand_color_text'), '#ffffff');
         $logo = self::logoUrl();
         $support = self::supportEmail();
         $webUrl = (string) AppConfig::get('web_url');
@@ -104,7 +104,7 @@ final class EmailTemplate
     }
 
     /** Only a plain #rgb/#rrggbb value reaches the stylesheet, whatever the yml says. */
-    private static function color(string $value, string $fallback): string
+    public static function safeColor(string $value, string $fallback): string
     {
         return preg_match('/^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/', trim($value)) ? trim($value) : $fallback;
     }

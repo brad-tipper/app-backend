@@ -111,6 +111,40 @@ async function tier() {
   return r.json.subscriptionTier;
 }
 
+// ---- homepage and login screen ----------------------------------------------------------
+{
+  const home = await fetch(`${base}/`, { redirect: "manual" });
+  assert.equal(home.status, 302, "the homepage should redirect");
+  assert.match(home.headers.get("location") ?? "", /\/Security\/login/);
+  const login = await (await fetch(`${base}/Security/login`)).text();
+  const title = login.match(/<title>([^<]*)<\/title>/)?.[1] ?? "";
+  assert.doesNotMatch(
+    title,
+    /Your Site Name/,
+    "the site still has Silverstripe's default name",
+  );
+  assert.match(title, / API( \((dev|local)\))?: Log in$/);
+  const host = new URL(base).hostname;
+  const suffix = host.startsWith("dev-api.")
+    ? "(dev)"
+    : host.endsWith(".ddev.site")
+      ? "(local)"
+      : "";
+  assert.equal(
+    /\((dev|local)\)/.exec(title)?.[0] ?? "",
+    suffix,
+    `title "${title}" does not name this environment`,
+  );
+  assert.match(
+    login,
+    /--color-button-primary-background:#[0-9a-f]{3,6}/i,
+    "the login page is not branded",
+  );
+}
+ok(
+  "the homepage redirects to a branded login page named for the app and environment",
+);
+
 // ---- sign-up + welcome ----------------------------------------------------
 assert.equal((await call("GET", "/v1/health")).status, 200);
 let r = await call("POST", "/v1/auth/sign-up", {
@@ -296,7 +330,10 @@ await expectMail("Reset your password");
 ok("forgot password sends the reset email");
 
 // Leave the throwaway account scheduled for deletion so a shared preview does not fill up with test users.
-r = await call("POST", "/v1/account/deletion", { token, body: { confirmation: "DELETE", email } });
+r = await call("POST", "/v1/account/deletion", {
+  token,
+  body: { confirmation: "DELETE", email },
+});
 assert.equal(r.status, 200, JSON.stringify(r.json));
 ok("the test account is left scheduled for deletion");
 
