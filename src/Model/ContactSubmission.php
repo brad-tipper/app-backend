@@ -33,6 +33,8 @@ class ContactSubmission extends DataObject
 
     private static array $indexes = ['Email' => true];
 
+    private static array $searchable_fields = ['Name', 'Email', 'Subject', 'Message'];
+
     private static array $summary_fields = ['Created', 'Name', 'Email', 'Subject'];
 
     private static string $default_sort = 'Created DESC';

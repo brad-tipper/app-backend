@@ -39,5 +39,26 @@ class RevenueCatEvent extends DataObject
         'AppUserUuid' => true,
     ];
 
+    private static array $summary_fields = [
+        'EventAt' => 'When',
+        'Type' => 'Event',
+        'Outcome' => 'Outcome',
+        'AppliedTier' => 'Tier set',
+        'ProductId' => 'Product',
+        'Environment' => 'Environment',
+        'AppUserUuid' => 'User UUID',
+    ];
+
+    private static array $searchable_fields = ['Type', 'Outcome', 'Environment', 'ProductId', 'AppUserUuid', 'EventId'];
+
     private static string $default_sort = 'Created DESC';
+    public function canCreate($member = null, $context = [])
+    {
+        return false;
+    }
+
+    public function canEdit($member = null)
+    {
+        return false;
+    }
 }

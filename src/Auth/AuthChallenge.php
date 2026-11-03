@@ -38,10 +38,43 @@ class AuthChallenge extends DataObject
         'Member' => Member::class,
     ];
 
+    private static array $summary_fields = [
+        'Created' => 'Sent',
+        'Type' => 'Type',
+        'ExpiresAtNice' => 'Expires',
+        'UsedAtNice' => 'Used',
+        'Attempts' => 'Attempts',
+        'Member.Email' => 'User',
+    ];
+
+    private static array $searchable_fields = ['Type', 'Member.Email'];
+
+    private static string $default_sort = 'Created DESC';
+
     private static array $indexes = [
         'TokenHash' => ['type' => 'unique', 'columns' => ['TokenHash']],
         'ExpiresAt' => true,
     ];
+
+    public function canCreate($member = null, $context = [])
+    {
+        return false;
+    }
+
+    public function canEdit($member = null)
+    {
+        return false;
+    }
+
+    public function getExpiresAtNice(): string
+    {
+        return $this->ExpiresAt ? gmdate('Y-m-d H:i', (int) $this->ExpiresAt) . ' UTC' : '';
+    }
+
+    public function getUsedAtNice(): string
+    {
+        return $this->UsedAt ? gmdate('Y-m-d H:i', (int) $this->UsedAt) . ' UTC' : '';
+    }
 
     /** Creates a challenge and returns the plaintext token (shown to the user once). */
     public static function issue(Member $member, string $type, int $ttlSeconds): string

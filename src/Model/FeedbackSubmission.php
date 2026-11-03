@@ -37,6 +37,8 @@ class FeedbackSubmission extends DataObject
     // Feedback outlives the account (the author is set to null, as before).
     private static array $has_one = ['Member' => Member::class];
 
+    private static array $searchable_fields = ['Name', 'Email', 'Subject', 'Message', 'Member.Email'];
+
     private static array $summary_fields = ['Created', 'Name', 'Email', 'Subject'];
 
     private static string $default_sort = 'Created DESC';

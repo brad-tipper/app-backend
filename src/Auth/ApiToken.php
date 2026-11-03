@@ -35,9 +35,41 @@ class ApiToken extends DataObject
         'Member' => Member::class,
     ];
 
+    private static array $summary_fields = [
+        'Created' => 'Signed in',
+        'UserAgent' => 'Device',
+        'MfaVerified' => 'Two-factor',
+        'AccessExpiresNice' => 'Access until',
+        'RefreshExpiresNice' => 'Session until',
+        'Member.Email' => 'User',
+    ];
+
+    private static array $searchable_fields = ['Member.Email', 'UserAgent'];
+
+    private static string $default_sort = 'Created DESC';
+
     private static array $indexes = [
         'AccessHash' => ['type' => 'unique', 'columns' => ['AccessHash']],
         'RefreshHash' => ['type' => 'unique', 'columns' => ['RefreshHash']],
         'RefreshExpires' => true,
     ];
+    public function canCreate($member = null, $context = [])
+    {
+        return false;
+    }
+
+    public function canEdit($member = null)
+    {
+        return false;
+    }
+
+    public function getAccessExpiresNice(): string
+    {
+        return $this->AccessExpires ? gmdate('Y-m-d H:i', (int) $this->AccessExpires) . ' UTC' : '';
+    }
+
+    public function getRefreshExpiresNice(): string
+    {
+        return $this->RefreshExpires ? gmdate('Y-m-d H:i', (int) $this->RefreshExpires) . ' UTC' : '';
+    }
 }

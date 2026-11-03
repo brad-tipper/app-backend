@@ -4,6 +4,11 @@ namespace BradTipper\AppBackend\Sync;
 
 use BradTipper\AppBackend\Api\Uuid;
 use SilverStripe\Core\Extension;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\GridField\GridField;
+use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
+use SilverStripe\Forms\GridField\GridFieldAddNewButton;
+use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 
@@ -34,6 +39,38 @@ class SyncedExtension extends Extension
     private static array $indexes = [
         'UUID' => ['type' => 'unique', 'columns' => ['UUID']],
     ];
+
+    /**
+     * Admin: the owner and UUID are fixed once a row exists, and rows are linked to their parent from the parent's
+     * own grid rather than picked from every user's data.
+     */
+    public function updateCMSFields(FieldList $fields): void
+    {
+        $record = $this->owner;
+        $fields->removeByName(['DeletedAt']);
+        if ($record->isInDB()) {
+            if ($fields->dataFieldByName('UUID')) {
+                $fields->replaceField('UUID', ReadonlyField::create('UUID', 'UUID'));
+            }
+            if ($fields->dataFieldByName('OwnerID')) {
+                $owner = $record->Owner();
+                $fields->replaceField('OwnerID', ReadonlyField::create(
+                    'OwnerLabel',
+                    'Owner',
+                    $owner->exists() ? "{$owner->Email} (user {$owner->ID})" : ''
+                ));
+            }
+        } else {
+            $fields->removeByName(['UUID']);
+        }
+        foreach ($fields->dataFields() as $field) {
+            if ($field instanceof GridField) {
+                $config = $field->getConfig();
+                $config->removeComponentsByType(GridFieldAddExistingAutocompleter::class);
+                $config->removeComponentsByType(GridFieldAddNewButton::class);
+            }
+        }
+    }
 
     public function onBeforeWrite(): void
     {
