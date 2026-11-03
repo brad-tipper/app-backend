@@ -80,15 +80,3 @@ SilverStripe\SiteConfig\SiteConfig:
 SilverStripe\Security\Security:
   extensions:
     - BradTipper\AppBackend\Support\LoginBrandExtension
----
-Name: app-backend-proxy
-After: '#requestprocessors'
----
-# Behind the Coolify proxy the request arrives as plain http; believe X-Forwarded-Proto so redirects and
-# absolute URLs use https. Only the scheme is trusted, and the apps are not reachable except through the proxy.
-SilverStripe\Core\Injector\Injector:
-  SilverStripe\Control\Middleware\TrustedProxyMiddleware:
-    properties:
-      TrustedProxyIPs: '*'
-      ProxySchemeHeaders:
-        - X-Forwarded-Proto
