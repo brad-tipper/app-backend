@@ -329,6 +329,61 @@ assert.equal(reset.status, 200);
 await expectMail("Reset your password");
 ok("forgot password sends the reset email");
 
+// ---- tickets: report, follow, add notes, close, reopen; private to their owner -------------------
+r = await call("POST", "/v1/tickets", { token, body: { type: "bug", title: "x" } });
+assert.equal(r.status, 422, "a ticket needs a real title and description");
+r = await call("GET", "/v1/tickets");
+assert.equal(r.status, 401);
+r = await call("POST", "/v1/tickets", {
+  token,
+  body: {
+    type: "bug",
+    title: "Lifecycle test bug",
+    description: "Something is wrong here, this is an automated test.",
+    appVersion: "1.0.0",
+    platform: "web",
+  },
+});
+assert.equal(r.status, 201, JSON.stringify(r.json));
+const ticketId = r.json.id;
+assert.equal(r.json.status, "open");
+assert.equal(r.json.messages.length, 0);
+await expectMail((s) => s.startsWith("We got your bug report"), "We got your bug report");
+ok("opening a ticket confirms by email");
+
+r = await call("GET", "/v1/tickets", { token });
+assert.equal(r.json.tickets.length, 1);
+assert.equal(r.json.tickets[0].id, ticketId);
+assert.equal(r.json.tickets[0].awaitingSupport, true);
+r = await call("POST", `/v1/tickets/${ticketId}/messages`, {
+  token,
+  body: { body: "More detail: it happens every time." },
+});
+assert.equal(r.status, 201, JSON.stringify(r.json));
+assert.equal(r.json.messages.length, 1);
+assert.equal(r.json.messages[0].from, "you");
+ok("the reporter can read their tickets and add notes");
+
+r = await call("POST", `/v1/tickets/${ticketId}/status`, { token, body: { status: "closed" } });
+assert.equal(r.json.status, "closed");
+r = await call("GET", "/v1/tickets?status=open", { token });
+assert.equal(r.json.tickets.length, 0);
+r = await call("POST", `/v1/tickets/${ticketId}/messages`, { token, body: { body: "Still broken." } });
+assert.equal(r.json.status, "open", "a note on a closed ticket reopens it");
+ok("closing hides it from open tickets and a new note reopens it");
+
+const other = `lifecycle.other.${stamp}@example.test`;
+r = await call("POST", "/v1/auth/sign-up", {
+  body: { email: other, password, name: "Other Tester", country: "nz", captchaToken },
+});
+assert.equal(r.status, 200, JSON.stringify(r.json));
+const otherToken = r.json.session.accessToken;
+assert.equal((await call("GET", `/v1/tickets/${ticketId}`, { token: otherToken })).status, 404);
+assert.equal((await call("POST", `/v1/tickets/${ticketId}/messages`, { token: otherToken, body: { body: "hi" } })).status, 404);
+assert.equal((await call("GET", "/v1/tickets", { token: otherToken })).json.tickets.length, 0);
+await call("POST", "/v1/account/deletion", { token: otherToken, body: { confirmation: "DELETE", email: other } });
+ok("other users cannot see or write to someone else's ticket");
+
 // Leave the throwaway account scheduled for deletion so a shared preview does not fill up with test users.
 r = await call("POST", "/v1/account/deletion", {
   token,

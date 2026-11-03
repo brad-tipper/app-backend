@@ -11,6 +11,7 @@ use BradTipper\AppBackend\Support\Notifications;
 use BradTipper\AppBackend\Model\ContactSubmission;
 use BradTipper\AppBackend\Model\FeedbackSubmission;
 use BradTipper\AppBackend\Model\RevenueCatEvent;
+use BradTipper\AppBackend\Model\Ticket;
 use BradTipper\AppBackend\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
@@ -43,6 +44,7 @@ class AccountController extends ApiController
             'user' => $member->toApiUser(),
             'contactSubmissions' => array_map($this->submissionRow(...), ContactSubmission::get()->filter('Email', $member->Email)->toArray()),
             'feedbackSubmissions' => array_map($this->submissionRow(...), FeedbackSubmission::get()->filter('MemberID', $member->ID)->toArray()),
+            'tickets' => array_map(static fn (Ticket $t) => $t->toApiDetail(), Ticket::get()->filter('OwnerID', $member->ID)->toArray()),
             'revenuecatWebhookEvents' => array_map(static fn (RevenueCatEvent $e) => [
                 'id' => $e->EventId,
                 'type' => $e->Type,

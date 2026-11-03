@@ -61,7 +61,7 @@ final class Mailer
      * development, where Mailpit catches everything, skip them instead of bouncing off the real
      * mail provider, which is what automated sign-ups against a preview would otherwise do.
      */
-    private static function isReservedTestAddress(string $to): bool
+    public static function isReservedTestAddress(string $to): bool
     {
         if (Environment::getEnv('SS_ENVIRONMENT_TYPE') === 'dev') {
             return false;

@@ -49,6 +49,9 @@ final class AppConfig
     /** Path of the web app's subscription screen, linked from billing emails. */
     private static string $subscription_path = '/subscription';
 
+    /** Path of the web app's support (tickets) screen; a ticket's id is appended for emailed links. */
+    private static string $tickets_path = '/support';
+
     /** Where replies and "contact us" links go; empty falls back to the sender address. */
     private static string $support_email = '';
 

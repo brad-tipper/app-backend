@@ -8,6 +8,7 @@ SilverStripe\Control\Director:
     'v1/auth//$Action/$ID/$OtherID': BradTipper\AppBackend\Auth\AuthController
     'v1/contact': BradTipper\AppBackend\Account\ContactController
     'v1/feedback': BradTipper\AppBackend\Account\FeedbackController
+    'v1/tickets//$Action/$ID': BradTipper\AppBackend\Account\TicketsController
     'v1/account//$Action': BradTipper\AppBackend\Account\AccountController
     'v1/webhooks/revenuecat': BradTipper\AppBackend\Account\RevenueCatWebhookController
     'v1/_e2e/seed': BradTipper\AppBackend\Testing\E2eSeedController
@@ -45,6 +46,9 @@ Name: app-backend-member
 SilverStripe\ORM\DataObject:
   extensions:
     - BradTipper\AppBackend\Admin\AppModelExtension
+BradTipper\AppBackend\Model\Ticket:
+  extensions:
+    - BradTipper\AppBackend\Sync\SyncedExtension
 SilverStripe\Security\Member:
   extensions:
     - BradTipper\AppBackend\Auth\ApiMemberExtension
