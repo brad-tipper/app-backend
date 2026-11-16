@@ -5,7 +5,7 @@ namespace BradTipper\AppBackend\Sync;
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
-use BradTipper\AppBackend\Api\Uuid;
+use Ramsey\Uuid\Uuid;
 use BradTipper\AppBackend\Auth\ApiMemberExtension;
 use BradTipper\AppBackend\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;

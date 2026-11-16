@@ -15,7 +15,7 @@ final class Turnstile
         if ($testToken !== '' && $token && Environment::getEnv('SS_ENVIRONMENT_TYPE') !== 'live' && hash_equals($testToken, $token)) {
             return true;
         }
-        $secret = trim((string) AppConfig::secret('turnstile_secret_key'));
+        $secret = trim((string) AppConfig::get('turnstile_secret_key'));
         if ($secret === '') {
             // Unconfigured: only acceptable outside live environments.
             return Environment::getEnv('SS_ENVIRONMENT_TYPE') !== 'live';

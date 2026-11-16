@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Api;
 
+use Ramsey\Uuid\Uuid;
 use SilverStripe\Control\HTTPRequest;
 
 /**

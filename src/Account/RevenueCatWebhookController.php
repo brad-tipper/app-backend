@@ -5,7 +5,7 @@ namespace BradTipper\AppBackend\Account;
 use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
-use BradTipper\AppBackend\Api\Uuid;
+use Ramsey\Uuid\Uuid;
 use BradTipper\AppBackend\Auth\ApiMemberExtension;
 use BradTipper\AppBackend\Model\RevenueCatEvent;
 use BradTipper\AppBackend\OpenApi\Spec;
@@ -55,7 +55,7 @@ class RevenueCatWebhookController extends ApiController
     {
         $this->requireMethod($request, 'POST');
 
-        $secret = trim((string) AppConfig::secret('revenuecat_webhook_secret'));
+        $secret = trim((string) AppConfig::get('revenuecat_webhook_secret'));
         $supplied = (string) $this->bearerToken($request);
         if ($secret === '' || !hash_equals($secret, $supplied)) {
             throw ApiException::unauthorized('Unauthorized.');

@@ -2,9 +2,10 @@
 
 namespace BradTipper\AppBackend\Auth;
 
-use BradTipper\AppBackend\Api\Uuid;
+use BradTipper\AppBackend\Model\DevicePushToken;
 use BradTipper\AppBackend\Support\Secrets;
 use BradTipper\AppBackend\Sync\SyncedExtension;
+use Ramsey\Uuid\Uuid;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\DataObject;
@@ -67,7 +68,7 @@ class ApiMemberExtension extends Extension
     public function onBeforeWrite(): void
     {
         if (!$this->owner->UUID) {
-            $this->owner->UUID = Uuid::v4();
+            $this->owner->UUID = Uuid::uuid4()->toString();
         }
         if ($this->owner->Email) {
             $this->owner->Email = strtolower(trim($this->owner->Email));
@@ -79,6 +80,7 @@ class ApiMemberExtension extends Extension
         $id = $this->owner->ID;
         ApiToken::get()->filter('MemberID', $id)->removeAll();
         AuthChallenge::get()->filter('MemberID', $id)->removeAll();
+        DevicePushToken::get()->filter('OwnerID', $id)->removeAll();
 
         // Cascade to everything the user owns (the old ON DELETE CASCADE).
         foreach (ClassInfo::subclassesFor(DataObject::class, false) as $class) {

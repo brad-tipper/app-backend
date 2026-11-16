@@ -18,7 +18,7 @@ class E2eSeedController extends ApiController
 {
     protected function dispatch(HTTPRequest $request): array
     {
-        $secret = (string) AppConfig::secret('e2e_seed_secret');
+        $secret = (string) AppConfig::get('e2e_seed_secret');
         if (Environment::getEnv('SS_ENVIRONMENT_TYPE') !== 'dev' || $secret === '') {
             throw ApiException::notFound();
         }

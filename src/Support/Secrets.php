@@ -31,7 +31,7 @@ final class Secrets
 
     private static function key(): string
     {
-        $configured = (string) AppConfig::secret('app_key');
+        $configured = (string) AppConfig::get('app_key');
         if ($configured !== '') {
             $key = base64_decode($configured, true);
             if ($key !== false && strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES) {

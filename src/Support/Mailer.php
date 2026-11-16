@@ -3,9 +3,11 @@
 namespace BradTipper\AppBackend\Support;
 
 use BradTipper\AppBackend\AppConfig;
-use BradTipper\AppBackend\Jobs\Queue;
+use BradTipper\AppBackend\Jobs\SendEmailJob;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Environment;
+use Symbiote\QueuedJobs\Services\QueuedJob;
+use Symbiote\QueuedJobs\Services\QueuedJobService;
 
 final class Mailer
 {
@@ -15,7 +17,7 @@ final class Mailer
      */
     public static function send(string $to, string $subject, string $text): void
     {
-        Queue::dispatch(self::class, 'deliver', [$to, $subject, $text], Queue::NOW, 0, "Email: {$subject}");
+        self::queue(new SendEmailJob($to, $subject, $text));
     }
 
     /**
@@ -25,7 +27,22 @@ final class Mailer
      */
     public static function notify(string $to, string $subject, array $content): void
     {
-        Queue::dispatch(self::class, 'deliverBranded', [$to, $subject, $content], Queue::NOW, 0, "Email: {$subject}");
+        self::queue(new SendEmailJob($to, $subject, null, $content));
+    }
+
+    /**
+     * Stores the job and runs it now. Silverstripe only auto-runs immediate jobs in CLI, so a web
+     * request runs it inline; a failure leaves a Broken job behind to inspect or restart.
+     */
+    private static function queue(SendEmailJob $job): void
+    {
+        $service = QueuedJobService::singleton();
+        $id = (int) $service->queueJob($job, null, 0, QueuedJob::QUEUED);
+        try {
+            $service->runJob($id);
+        } catch (\Throwable $e) {
+            error_log(sprintf('[mail] %s failed: %s', $job->getTitle(), $e->getMessage()));
+        }
     }
 
     /** The job body: hands the message to Silverstripe's configured mailer. */

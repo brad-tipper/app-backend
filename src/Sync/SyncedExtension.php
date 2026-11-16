@@ -2,7 +2,7 @@
 
 namespace BradTipper\AppBackend\Sync;
 
-use BradTipper\AppBackend\Api\Uuid;
+use Ramsey\Uuid\Uuid;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
@@ -76,7 +76,7 @@ class SyncedExtension extends Extension
     {
         $record = $this->owner;
         if (!$record->UUID) {
-            $record->UUID = Uuid::v4();
+            $record->UUID = Uuid::uuid4()->toString();
         }
         if ($record->isChanged('Deleted', DataObject::CHANGE_VALUE)) {
             $record->DeletedAt = $record->Deleted ? gmdate('Y-m-d H:i:s') : null;

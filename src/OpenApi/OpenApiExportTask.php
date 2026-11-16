@@ -4,6 +4,7 @@ namespace BradTipper\AppBackend\OpenApi;
 
 use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Api\ApiController;
+use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\PolyExecution\PolyOutput;
@@ -50,10 +51,15 @@ class OpenApiExportTask extends BuildTask
         $spec = new Spec($title, '1.0.0', $server);
         CommonSchemas::register($spec);
 
+        // Shared controllers (uploads, push tokens) are opt-in per app, so only describe the ones routed.
+        $routed = [];
+        foreach ((array) Director::config()->get('rules') as $target) {
+            $routed[ltrim(is_array($target) ? (string) ($target['Controller'] ?? '') : (string) $target, '\\')] = true;
+        }
         $classes = ClassInfo::subclassesFor(ApiController::class, false);
         sort($classes);
         foreach ($classes as $class) {
-            if ((new \ReflectionClass($class))->isAbstract()) {
+            if ((new \ReflectionClass($class))->isAbstract() || !isset($routed[ltrim($class, '\\')])) {
                 continue;
             }
             if (method_exists($class, 'describe')) {

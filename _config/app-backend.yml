@@ -20,7 +20,6 @@ SilverStripe\Core\Injector\Injector:
     properties:
       Middlewares:
         AppBackendCors: '%$BradTipper\AppBackend\Api\CorsMiddleware'
-        AppBackendHomeRedirect: '%$BradTipper\AppBackend\Api\HomeRedirectMiddleware'
 ---
 Name: app-backend-passwords
 After: '#corepasswords'
@@ -33,19 +32,8 @@ SilverStripe\Security\Validation\RulesPasswordValidator:
   min_length: 12
   min_test_score: 4
 ---
-Name: app-backend-mailer
-After: '#mailer'
----
-# SMTP settings come from the project's app/_config/smtp.yml; the password is the SMTP_PASSWORD env var.
-SilverStripe\Core\Injector\Injector:
-  Symfony\Component\Mailer\Transport\TransportInterface:
-    factory: BradTipper\AppBackend\Support\SmtpTransportFactory
----
 Name: app-backend-member
 ---
-SilverStripe\ORM\DataObject:
-  extensions:
-    - BradTipper\AppBackend\Admin\AppModelExtension
 BradTipper\AppBackend\Model\Ticket:
   extensions:
     - BradTipper\AppBackend\Sync\SyncedExtension
@@ -85,6 +73,52 @@ Name: app-backend-branding
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
     - BradTipper\AppBackend\Support\SiteConfigBrandExtension
-SilverStripe\Security\Security:
+
+---
+Name: app-backend-cache
+After:
+  - '#requestprocessors'
+---
+# PSR-16 cache for the app (Silverstripe's CacheFactory; filesystem under silverstripe-cache), and the page cache
+# middleware that uses it. The page cache is on for `live` only; set `AppCache: enabled: true` to try it locally.
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.appBackend:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: 'appBackend'
+      defaultLifetime: 86400
+      # Not the versioned-stage proxy (keys would differ between the middleware and the controller), and no in-process
+      # APCu layer (a bump from a CLI task or queued job must be seen by the web workers).
+      disable-container: true
+      useInMemoryCache: false
+  SilverStripe\Control\Director:
+    properties:
+      Middlewares:
+        AppBackendPageCache: '%$BradTipper\AppBackend\Cache\PageCacheMiddleware'
+---
+Name: app-backend-cache-live
+Only:
+  environment: live
+---
+BradTipper\AppBackend\Cache\AppCache:
+  enabled: true
+---
+Name: app-backend-cache-cms
+Only:
+  classexists: 'SilverStripe\CMS\Model\SiteTree'
+---
+# Anything edited in the CMS that shows on the public site busts the page cache.
+SilverStripe\CMS\Model\SiteTree:
   extensions:
-    - BradTipper\AppBackend\Support\LoginBrandExtension
+    - BradTipper\AppBackend\Cache\BustsSiteCache
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - BradTipper\AppBackend\Cache\BustsSiteCache
+---
+Name: app-backend-cache-elemental
+Only:
+  classexists: 'DNADesign\Elemental\Models\BaseElement'
+---
+DNADesign\Elemental\Models\BaseElement:
+  extensions:
+    - BradTipper\AppBackend\Cache\BustsSiteCache

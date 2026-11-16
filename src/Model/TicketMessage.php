@@ -2,7 +2,7 @@
 
 namespace BradTipper\AppBackend\Model;
 
-use BradTipper\AppBackend\Api\Uuid;
+use Ramsey\Uuid\Uuid;
 use BradTipper\AppBackend\Auth\ApiMemberExtension;
 use BradTipper\AppBackend\Support\Notifications;
 use SilverStripe\Forms\CheckboxField;
@@ -80,7 +80,7 @@ class TicketMessage extends DataObject
     {
         parent::onBeforeWrite();
         if (!$this->UUID) {
-            $this->UUID = Uuid::v4();
+            $this->UUID = Uuid::uuid4()->toString();
         }
         $this->wasNew = !$this->isInDB();
         if ($this->wasNew && $this->Staff && !$this->AuthorID && ($admin = Security::getCurrentUser())) {

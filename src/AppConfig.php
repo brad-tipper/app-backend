@@ -3,14 +3,12 @@
 namespace BradTipper\AppBackend;
 
 use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Core\Environment;
 
 /**
  * Non-secret, per-app settings. Set them in the project's `app/_config/app.yml`
  * (use `Only: environment: dev|live` fragments for per-environment values).
  * Secrets (below) are also set in yml, in `Only: environment: live` fragments that
- * the private repo commits; only database details stay in `.env`. A secret left
- * empty in yml falls back to the same-named environment variable (deprecated).
+ * the private repo commits; only database details stay in `.env`.
  */
 final class AppConfig
 {
@@ -67,9 +65,8 @@ final class AppConfig
     /** Secrets. Empty by default; set in yml (live values in a `live` fragment). */
     private static string $app_key = '';
 
+    /** Read by each project's app/_config.php to build its MAILER_DSN; app-backend itself never uses it. */
     private static string $smtp_password = '';
-
-    private static string $mailer_dsn = '';
 
     private static string $turnstile_secret_key = '';
 
@@ -85,13 +82,6 @@ final class AppConfig
     public static function get(string $key): mixed
     {
         return self::config()->get($key);
-    }
-
-    /** A secret from yml, else the deprecated same-named environment variable (upper case). */
-    public static function secret(string $key): string
-    {
-        $value = trim((string) self::config()->get($key));
-        return $value !== '' ? $value : trim((string) Environment::getEnv(strtoupper($key)));
     }
 
     /** @return string[] */
