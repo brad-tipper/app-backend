@@ -16,7 +16,7 @@ use SilverStripe\Core\Config\Configurable;
  *
  * It only ever stores a response that is safe to share: status 200, HTML/XML/text, no cookie set, no CSRF
  * token in the body, and a request with no login/session cookie, no `Authorization` header and no query
- * string (apart from tracking parameters). The API (`v1/`), the CMS and Silverstripe's own routes are never
+ * string (apart from tracking parameters). The API (`api/v1/`), the CMS and Silverstripe's own routes are never
  * touched. Pages that contain a form carry a session-bound token, so they are rendered normally every time.
  *
  * Responses also get `Cache-Control: public, max-age=N` so browsers and any proxy in
@@ -35,7 +35,7 @@ class PageCacheMiddleware implements HTTPMiddleware
     private static int $max_body_bytes = 2097152;
 
     /** First URL segments that are never cached. @var string[] */
-    private static array $excluded_prefixes = ['admin', 'Security', 'dev', 'v1', 'graphql', '_resources', 'assets', '__'];
+    private static array $excluded_prefixes = ['admin', 'Security', 'dev', 'api', 'graphql', '_resources', 'assets', '__'];
 
     /** Query parameters that do not change the page (analytics). A request with any other parameter is not cached. @var string[] */
     private static array $ignored_query_params = [

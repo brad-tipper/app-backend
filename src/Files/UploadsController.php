@@ -10,13 +10,13 @@ use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Security\Member;
 
 /**
- * Private file uploads. Opt in per app by routing `'v1/uploads//$Action'` to it (with FilesController on
- * `v1/files`). By default each account has its own area; subclass and override the hooks below for anything
+ * Private file uploads. Opt in per app by routing `'api/v1/uploads//$Action'` to it (with FilesController on
+ * `api/v1/files`). By default each account has its own area; subclass and override the hooks below for anything
  * more specific (a Pro-only file type, files that belong to a workspace).
  *
- *   POST   /v1/uploads            raw file bytes (Content-Type = the file type) -> {path, size_bytes, mime_type}
- *   GET    /v1/uploads/url?path=  a one-hour signed URL for the file
- *   DELETE /v1/uploads?path=      removes the file
+ *   POST   /api/v1/uploads            raw file bytes (Content-Type = the file type) -> {path, size_bytes, mime_type}
+ *   GET    /api/v1/uploads/url?path=  a one-hour signed URL for the file
+ *   DELETE /api/v1/uploads?path=      removes the file
  *
  * The upload is a raw body, so it is not in openapi.json; the app posts it with the shared API client.
  */
@@ -30,14 +30,14 @@ class UploadsController extends ApiController
             'url' => Spec::string('uri'),
             'expires_at' => Spec::string('date-time'),
         ]));
-        $spec->operation('get', '/v1/uploads/url', 'getUploadUrl', [
+        $spec->operation('get', '/api/v1/uploads/url', 'getUploadUrl', [
             'tags' => ['Uploads'],
             'summary' => 'A short-lived signed URL for an uploaded file',
             'auth' => true,
             'query' => ['path' => ['schema' => Spec::string(), 'required' => true]],
             'responses' => [200 => Spec::ref('SignedFileUrl')],
         ]);
-        $spec->operation('delete', '/v1/uploads', 'deleteUpload', [
+        $spec->operation('delete', '/api/v1/uploads', 'deleteUpload', [
             'tags' => ['Uploads'],
             'summary' => 'Delete an uploaded file',
             'auth' => true,

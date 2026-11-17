@@ -8,10 +8,10 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 
 /**
- * Serves a stored file. Opt in per app by routing `'v1/files//$ID/$OtherID'` to it.
+ * Serves a stored file. Opt in per app by routing `'api/v1/files//$ID/$OtherID'` to it.
  *
- *   GET /v1/files/{scope-uuid}/{name}?exp=&sig=   private files, with a signature from /v1/uploads/url
- *   GET /v1/logos/{scope-uuid}/{name}             public files named `logo-*` (they appear in emails); route it too if needed
+ *   GET /api/v1/files/{scope-uuid}/{name}?exp=&sig=   private files, with a signature from /api/v1/uploads/url
+ *   GET /api/v1/logos/{scope-uuid}/{name}             public files named `logo-*` (they appear in emails); route it too if needed
  *
  * Not described in openapi.json.
  */

@@ -11,7 +11,7 @@ use SilverStripe\Control\HTTPResponse;
 
 /**
  * Registers (idempotently) the Expo push token of the caller's device. Opt in per app by routing
- * `'v1/device-push-tokens'` to it; the app's own jobs read DevicePushToken to send notifications.
+ * `'api/v1/device-push-tokens'` to it; the app's own jobs read DevicePushToken to send notifications.
  */
 class DevicePushTokensController extends ApiController
 {
@@ -22,7 +22,7 @@ class DevicePushTokensController extends ApiController
             'platform' => Spec::enum(DevicePushToken::PLATFORMS),
             'timezone' => Spec::string(null, true),
         ], ['token', 'platform']));
-        $spec->operation('put', '/v1/device-push-tokens', 'registerDevicePushToken', [
+        $spec->operation('put', '/api/v1/device-push-tokens', 'registerDevicePushToken', [
             'tags' => ['Notifications'],
             'summary' => 'Register this device for push notifications',
             'auth' => true,

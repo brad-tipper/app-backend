@@ -137,20 +137,20 @@ class AccountController extends ApiController
         $spec->schema('AccountExport', Spec::map());
 
         $tag = ['Account'];
-        $spec->operation('get', '/v1/account/export', 'exportAccount', [
+        $spec->operation('get', '/api/v1/account/export', 'exportAccount', [
             'tags' => $tag, 'summary' => 'Export all of the user\'s data', 'auth' => true,
             'responses' => [200 => Spec::ref('AccountExport')],
         ]);
-        $spec->operation('get', '/v1/account/deletion', 'getAccountDeletion', [
+        $spec->operation('get', '/api/v1/account/deletion', 'getAccountDeletion', [
             'tags' => $tag, 'summary' => 'Current deletion request, if any', 'auth' => true,
             'responses' => [200 => Spec::ref('DeletionStatus')],
         ]);
-        $spec->operation('post', '/v1/account/deletion', 'requestAccountDeletion', [
+        $spec->operation('post', '/api/v1/account/deletion', 'requestAccountDeletion', [
             'tags' => $tag, 'summary' => 'Schedule the account for deletion', 'auth' => true,
             'body' => Spec::ref('DeletionRequest'),
             'responses' => [200 => Spec::ref('DeletionStatus')],
         ]);
-        $spec->operation('delete', '/v1/account/deletion', 'cancelAccountDeletion', [
+        $spec->operation('delete', '/api/v1/account/deletion', 'cancelAccountDeletion', [
             'tags' => $tag, 'summary' => 'Cancel a scheduled deletion', 'auth' => true,
             'responses' => [200 => Spec::ref('DeletionStatus')],
         ]);

@@ -12,7 +12,7 @@ Shared Silverstripe 6 headless API foundations for the app fleet. Each `{app}-ap
 - `Admin/` - the per-user tabs under Security -> Users, plus the Support and Tickets admins. Each app defines its own `ModelAdmin` for its data.
 - `OpenApi/` - a small builder; every routed controller has `describe(Spec $spec)`. `sake tasks:openapi-export --output=openapi.json` writes the contract hey-api generates the client from.
 
-Opt-in controllers (`DevicePushTokensController`, `Files\UploadsController`, `Files\FilesController`) are routed in the app's own yml, e.g. `'v1/device-push-tokens': BradTipper\AppBackend\Account\DevicePushTokensController`. Only routed controllers appear in the app's OpenAPI document.
+Opt-in controllers (`DevicePushTokensController`, `Files\UploadsController`, `Files\FilesController`) are routed in the app's own yml, e.g. `'api/v1/device-push-tokens': BradTipper\AppBackend\Account\DevicePushTokensController`. Only routed controllers appear in the app's OpenAPI document.
 
 Mail: set `MAILER_DSN` (a real environment variable, or `Environment::setEnv()` in the project's `app/_config.php`). There is no module-level transport config.
 

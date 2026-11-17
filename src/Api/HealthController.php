@@ -10,7 +10,7 @@ class HealthController extends ApiController
 {
     public static function describe(Spec $spec): void
     {
-        $spec->operation('get', '/v1/health', 'getHealth', [
+        $spec->operation('get', '/api/v1/health', 'getHealth', [
             'tags' => ['System'],
             'summary' => 'Liveness and database check',
             'responses' => [200 => Spec::ref('Health')],

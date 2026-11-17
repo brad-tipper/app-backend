@@ -17,10 +17,10 @@ use SilverStripe\Security\Member;
 /**
  * REST resource for an offline-first entity:
  *
- *   GET    /v1/{resource}?updated_since=&include_deleted=   delta fetch
- *   GET    /v1/{resource}/{id}
- *   PUT    /v1/{resource}/{id}                            idempotent create-or-update
- *   DELETE /v1/{resource}/{id}[?permanent=true]           soft (default) or hard delete
+ *   GET    /api/v1/{resource}?updated_since=&include_deleted=   delta fetch
+ *   GET    /api/v1/{resource}/{id}
+ *   PUT    /api/v1/{resource}/{id}                            idempotent create-or-update
+ *   DELETE /api/v1/{resource}/{id}[?permanent=true]           soft (default) or hard delete
  *
  * Ids are client-generated UUIDs, so a write queued offline can be replayed
  * safely. Concrete controllers supply the model mapping.
@@ -230,7 +230,7 @@ abstract class SyncController extends ApiController
     public static function describe(Spec $spec): void
     {
         $name = static::itemName();
-        $path = '/v1/' . static::resourcePath();
+        $path = '/api/v1/' . static::resourcePath();
         $tag = [ucfirst(static::resourcePath())];
         $idParam = ['id' => Spec::string('uuid')];
 

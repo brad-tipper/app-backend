@@ -6,7 +6,7 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 
 /**
- * An Expo push token for one of a person's devices. Written through `PUT /v1/device-push-tokens`
+ * An Expo push token for one of a person's devices. Written through `PUT /api/v1/device-push-tokens`
  * (DevicePushTokensController), not delta-synced; removed with the account.
  *
  * @property string $Token

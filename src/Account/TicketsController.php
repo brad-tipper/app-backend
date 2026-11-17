@@ -17,11 +17,11 @@ use SilverStripe\Security\Member;
  * A light ticketing system for signed-in users: report a bug, ask for a feature or leave feedback, then follow it
  * and add notes. Users only ever see their own tickets and the notes meant for them. Plain text only.
  *
- *   GET  /v1/tickets                  the user's tickets, newest activity first (?status=open|closed)
- *   POST /v1/tickets                  open a ticket
- *   GET  /v1/tickets/{id}             one ticket with its conversation
- *   POST /v1/tickets/{id}/messages    add a note (reopens a resolved or closed ticket)
- *   POST /v1/tickets/{id}/status      {"status":"closed"|"open"}
+ *   GET  /api/v1/tickets                  the user's tickets, newest activity first (?status=open|closed)
+ *   POST /api/v1/tickets                  open a ticket
+ *   GET  /api/v1/tickets/{id}             one ticket with its conversation
+ *   POST /api/v1/tickets/{id}/messages    add a note (reopens a resolved or closed ticket)
+ *   POST /api/v1/tickets/{id}/status      {"status":"closed"|"open"}
  */
 class TicketsController extends ApiController
 {
@@ -73,28 +73,28 @@ class TicketsController extends ApiController
 
         $tags = ['Support'];
         $id = ['id' => Spec::string('uuid')];
-        $spec->operation('get', '/v1/tickets', 'listTickets', [
+        $spec->operation('get', '/api/v1/tickets', 'listTickets', [
             'tags' => $tags,
             'auth' => true,
             'summary' => 'List my tickets',
             'query' => ['status' => ['schema' => Spec::enum(['open', 'closed'])]],
             'responses' => [200 => Spec::ref('TicketList')],
         ]);
-        $spec->operation('post', '/v1/tickets', 'createTicket', [
+        $spec->operation('post', '/api/v1/tickets', 'createTicket', [
             'tags' => $tags,
             'auth' => true,
             'summary' => 'Open a ticket',
             'body' => Spec::ref('CreateTicketRequest'),
             'responses' => [201 => Spec::ref('Ticket')],
         ]);
-        $spec->operation('get', '/v1/tickets/{id}', 'getTicket', [
+        $spec->operation('get', '/api/v1/tickets/{id}', 'getTicket', [
             'tags' => $tags,
             'auth' => true,
             'summary' => 'One of my tickets with its conversation',
             'path' => $id,
             'responses' => [200 => Spec::ref('Ticket')],
         ]);
-        $spec->operation('post', '/v1/tickets/{id}/messages', 'addTicketMessage', [
+        $spec->operation('post', '/api/v1/tickets/{id}/messages', 'addTicketMessage', [
             'tags' => $tags,
             'auth' => true,
             'summary' => 'Add a note to a ticket',
@@ -102,7 +102,7 @@ class TicketsController extends ApiController
             'body' => Spec::ref('TicketMessageRequest'),
             'responses' => [201 => Spec::ref('Ticket')],
         ]);
-        $spec->operation('post', '/v1/tickets/{id}/status', 'setTicketStatus', [
+        $spec->operation('post', '/api/v1/tickets/{id}/status', 'setTicketStatus', [
             'tags' => $tags,
             'auth' => true,
             'summary' => 'Close or reopen a ticket',

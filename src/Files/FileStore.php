@@ -165,7 +165,7 @@ final class FileStore
         $expires = time() + $ttl;
         $base = rtrim((string) AppConfig::get('public_url'), '/');
         return [
-            'url' => sprintf('%s/v1/files/%s?exp=%d&sig=%s', $base, $path, $expires, self::sign($path, $expires)),
+            'url' => sprintf('%s/api/v1/files/%s?exp=%d&sig=%s', $base, $path, $expires, self::sign($path, $expires)),
             'expires_at' => gmdate(DATE_ATOM, $expires),
         ];
     }

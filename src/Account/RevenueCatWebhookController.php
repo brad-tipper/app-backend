@@ -43,7 +43,7 @@ class RevenueCatWebhookController extends ApiController
             'subscriptionStatus' => Spec::string(),
             'notified' => Spec::boolean(),
         ], ['ok', 'processed']));
-        $spec->operation('post', '/v1/webhooks/revenuecat', 'revenueCatWebhook', [
+        $spec->operation('post', '/api/v1/webhooks/revenuecat', 'revenueCatWebhook', [
             'tags' => ['Webhooks'],
             'summary' => 'RevenueCat server-to-server event',
             'body' => Spec::ref('RevenueCatWebhookRequest'),

@@ -603,7 +603,7 @@ class AuthController extends ApiController
         $ok = Spec::ref('Ok');
         $result = Spec::ref('AuthResult');
         $op = static fn (string $m, string $p, string $id, string $summary, ?string $body, array $response, bool $auth = false)
-            => $spec->operation($m, "/v1/auth/{$p}", $id, [
+            => $spec->operation($m, "/api/v1/auth/{$p}", $id, [
                 'tags' => $tag,
                 'summary' => $summary,
                 'auth' => $auth,

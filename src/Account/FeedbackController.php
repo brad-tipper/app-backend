@@ -30,7 +30,7 @@ class FeedbackController extends ApiController
             'turnstileToken' => $s(),
         ], ['name', 'email', 'type', 'message', 'pageUrl', 'gdprConsent']));
         $spec->schema('FeedbackResult', Spec::object(['ok' => Spec::boolean(), 'emailSent' => Spec::boolean()]));
-        $spec->operation('post', '/v1/feedback', 'submitFeedback', [
+        $spec->operation('post', '/api/v1/feedback', 'submitFeedback', [
             'tags' => ['Support'],
             'summary' => 'Send feedback',
             'body' => Spec::ref('FeedbackRequest'),

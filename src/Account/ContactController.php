@@ -25,7 +25,7 @@ class ContactController extends ApiController
             'gdprConsent' => Spec::boolean(),
             'turnstileToken' => $s(),
         ], ['name', 'email', 'subject', 'message', 'pageUrl', 'gdprConsent']));
-        $spec->operation('post', '/v1/contact', 'submitContact', [
+        $spec->operation('post', '/api/v1/contact', 'submitContact', [
             'tags' => ['Support'],
             'summary' => 'Send a contact message',
             'body' => Spec::ref('ContactRequest'),

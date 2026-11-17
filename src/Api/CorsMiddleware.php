@@ -8,7 +8,7 @@ use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Middleware\HTTPMiddleware;
 
 /**
- * CORS for /v1/*. Bearer tokens (no cookies) mean `*` is safe, but a comma
+ * CORS for /api/v1/*. Bearer tokens (no cookies) mean `*` is safe, but a comma
  * separated API_CORS_ORIGINS list narrows it for production.
  */
 class CorsMiddleware implements HTTPMiddleware
@@ -16,7 +16,7 @@ class CorsMiddleware implements HTTPMiddleware
     public function process(HTTPRequest $request, callable $delegate)
     {
         $url = ltrim($request->getURL(), '/');
-        if ($url !== 'v1' && !str_starts_with($url, 'v1/')) {
+        if ($url !== 'api/v1' && !str_starts_with($url, 'api/v1/')) {
             return $delegate($request);
         }
 
@@ -30,7 +30,7 @@ class CorsMiddleware implements HTTPMiddleware
 
     private function decorate(HTTPRequest $request, HTTPResponse $response): void
     {
-        // All /v1 responses are data, never HTML documents. Keep the headers here
+        // All /api/v1 responses are data, never HTML documents. Keep the headers here
         // so custom controllers, error paths, and preflight replies stay aligned.
         if (!$response->getHeader('Cache-Control')) {
             $response->addHeader('Cache-Control', 'no-store');
