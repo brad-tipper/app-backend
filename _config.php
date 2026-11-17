@@ -8,7 +8,7 @@ date_default_timezone_set('UTC');
 // PHP's own production default already excludes E_DEPRECATED.
 error_reporting(error_reporting() & ~E_DEPRECATED);
 
-// Behind the Coolify proxy the request reaches PHP as plain http, so Silverstripe would build
+// Behind the hosting proxy the request reaches PHP as plain http, so Silverstripe would build
 // absolute URLs (the CMS's own redirects, for one) with http://. Each API already states its own
 // public origin per environment, so use that as the base URL.
 $publicUrl = rtrim((string) \BradTipper\AppBackend\AppConfig::get('public_url'), '/');
