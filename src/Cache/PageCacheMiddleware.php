@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Cache;
 
+use BradTipper\AppBackend\AppConfig;
 use Innoweb\CookieConsent\CookieConsent;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
@@ -19,18 +20,24 @@ use SilverStripe\Core\Config\Configurable;
  * string (apart from tracking parameters). The API (`api/v1/`), the CMS and Silverstripe's own routes are never
  * touched. Pages that contain a form carry a session-bound token, so they are rendered normally every time.
  *
- * Responses also get `Cache-Control: public, max-age=N` so browsers and any proxy in
- * front can reuse them briefly. Anything this does not cache is marked `X-App-Cache: BYPASS`.
+ * Responses also get `Cache-Control: public, max-age=3600, s-maxage=2592000` (browsers one hour, Cloudflare 30 days;
+ * an edit purges the edge, see Support\CloudflarePurge). Anything this does not cache is marked `X-Page-Cache: BYPASS`.
  */
 class PageCacheMiddleware implements HTTPMiddleware
 {
     use Configurable;
 
-    /** How long a browser may reuse a page without asking. Edits show up within this time. */
-    private static int $browser_max_age = 60;
+    /** How long a browser may reuse a page without asking. */
+    private static int $browser_max_age = 3600;
 
-    /** Longest a stored page lives even if nothing changes. */
-    private static int $ttl = 86400;
+    /** How long a shared cache (Cloudflare) may keep a page. Edits purge it (Support\CloudflarePurge). */
+    private static int $shared_max_age = 2592000;
+
+    /** Longest a stored page lives even if nothing changes (30 days). Edits and flushes bust it sooner. */
+    private static int $ttl = 2592000;
+
+    /** Extra hostnames (besides the public_url host and its www.) whose pages may be cached. @var string[] */
+    private static array $extra_hosts = [];
 
     private static int $max_body_bytes = 2097152;
 
@@ -65,7 +72,7 @@ class PageCacheMiddleware implements HTTPMiddleware
             foreach ($hit['headers'] as $name => $value) {
                 $response->addHeader($name, $value);
             }
-            $response->addHeader('X-App-Cache', 'HIT');
+            $response->addHeader('X-Page-Cache', 'HIT');
             $this->allowSharing();
             return $response;
         }
@@ -74,25 +81,28 @@ class PageCacheMiddleware implements HTTPMiddleware
         if ($this->isStorableResponse($response)) {
             $headers = [];
             foreach ($response->getHeaders() as $name => $value) {
-                if (!in_array(strtolower($name), ['set-cookie', 'date', 'age', 'etag', 'cache-control', 'expires', 'last-modified', 'x-app-cache', 'vary'], true)) {
+                if (!in_array(strtolower($name), ['set-cookie', 'date', 'age', 'etag', 'cache-control', 'expires', 'last-modified', 'x-page-cache', 'vary'], true)) {
                     $headers[$name] = $value;
                 }
             }
             $store->set($key, ['body' => $response->getBody(), 'headers' => $headers], (int) self::config()->get('ttl'));
-            $response->addHeader('X-App-Cache', 'MISS');
+            $response->addHeader('X-Page-Cache', 'MISS');
             $this->allowSharing();
         } else {
-            $response->addHeader('X-App-Cache', 'BYPASS');
+            $response->addHeader('X-Page-Cache', 'BYPASS');
         }
         return $response;
     }
 
     private function isCacheableRequest(HTTPRequest $request): bool
     {
-        if (strtoupper($request->httpMethod()) !== 'GET' || $request->getHeader('Authorization')) {
+        if (strtoupper($request->httpMethod()) !== 'GET' || $request->getHeader('Authorization') || !$this->isKnownHost($request)) {
             return false;
         }
         $segment = strtolower((string) strtok(ltrim($request->getURL(), '/'), '/'));
+        if (str_starts_with($segment, '_')) {
+            return false;
+        }
         foreach ((array) self::config()->get('excluded_prefixes') as $prefix) {
             if ($segment === strtolower((string) $prefix)) {
                 return false;
@@ -107,6 +117,18 @@ class PageCacheMiddleware implements HTTPMiddleware
             }
         }
         return true;
+    }
+
+    /** Only the site's own hostnames are cached, so a forged Host header cannot fill the cache. */
+    private function isKnownHost(HTTPRequest $request): bool
+    {
+        $host = strtolower((string) preg_replace('/:\d+$/', '', (string) $request->getHeader('Host')));
+        $own = strtolower((string) parse_url((string) AppConfig::get('public_url'), PHP_URL_HOST));
+        $allowed = array_map('strtolower', (array) self::config()->get('extra_hosts'));
+        if ($own !== '') {
+            array_push($allowed, $own, 'www.' . $own);
+        }
+        return $host !== '' && in_array($host, $allowed, true);
     }
 
     /** What makes one cached page different from another: host, path and the consent choices the output depends on. */
@@ -146,6 +168,8 @@ class PageCacheMiddleware implements HTTPMiddleware
 
     private function allowSharing(): void
     {
-        HTTPCacheControlMiddleware::singleton()->publicCache(false, (int) self::config()->get('browser_max_age'));
+        HTTPCacheControlMiddleware::singleton()
+            ->publicCache(true, (int) self::config()->get('browser_max_age'))
+            ->setSharedMaxAge((int) self::config()->get('shared_max_age'));
     }
 }

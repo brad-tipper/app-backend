@@ -2,6 +2,7 @@
 
 namespace BradTipper\AppBackend\Cache;
 
+use BradTipper\AppBackend\Support\CloudflarePurge;
 use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injector;
@@ -52,6 +53,10 @@ final class AppCache
     public static function bump(string $scope): void
     {
         self::store()->set('gen.' . self::slug($scope), self::newGeneration());
+        if ($scope === BustsSiteCache::SCOPE) {
+            // The public pages changed, so the Cloudflare edge copies are stale too.
+            CloudflarePurge::schedule();
+        }
     }
 
     /** The full cache key for a name inside a scope (PSR-16 keys may not contain `{}()/\@:`). */

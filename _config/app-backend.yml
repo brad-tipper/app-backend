@@ -96,6 +96,17 @@ SilverStripe\Core\Injector\Injector:
       Middlewares:
         AppBackendPageCache: '%$BradTipper\AppBackend\Cache\PageCacheMiddleware'
 ---
+Name: app-backend-cache-defaults
+---
+# Page cache lifetimes: stored 30 days, browsers 1 hour, Cloudflare 30 days. Any content change or flush busts the stored
+# pages and purges Cloudflare. A project sets its zone id under CloudflarePurge in app/_config/cache.yml.
+BradTipper\AppBackend\Cache\PageCacheMiddleware:
+  ttl: 2592000
+  browser_max_age: 3600
+  shared_max_age: 2592000
+BradTipper\AppBackend\Support\CloudflarePurge:
+  zone_id: ''
+---
 Name: app-backend-cache-live
 Only:
   environment: live

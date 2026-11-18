@@ -79,6 +79,9 @@ final class AppConfig
 
     private static string $e2e_seed_secret = '';
 
+    /** Cloudflare API token scoped to Cache Purge on this site's zone (see Support\CloudflarePurge). Live only. */
+    private static string $cloudflare_purge_token = '';
+
     public static function get(string $key): mixed
     {
         return self::config()->get($key);
