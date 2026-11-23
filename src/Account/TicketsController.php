@@ -7,6 +7,7 @@ use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
 use BradTipper\AppBackend\Model\Ticket;
 use BradTipper\AppBackend\Model\TicketMessage;
+use BradTipper\AppBackend\OpenApi\Spec;
 use BradTipper\AppBackend\Support\Notifications;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
@@ -25,6 +26,91 @@ use SilverStripe\Security\Member;
 class TicketsController extends ApiController
 {
     private const MAX_MESSAGES = 200;
+
+    public static function describe(Spec $spec): void
+    {
+        $string = static fn () => Spec::string();
+        $spec->schema('TicketSummary', Spec::object([
+            'id' => Spec::string('uuid'),
+            'number' => Spec::integer(),
+            'type' => Spec::enum(array_keys(Ticket::TYPES)),
+            'title' => $string(),
+            'status' => Spec::enum(array_keys(Ticket::STATUSES)),
+            'createdAt' => Spec::string('date-time'),
+            'updatedAt' => Spec::string('date-time'),
+            'awaitingSupport' => Spec::boolean(),
+        ]));
+        $spec->schema('TicketMessage', Spec::object([
+            'id' => Spec::string('uuid'),
+            'from' => Spec::enum(['you', 'support']),
+            'body' => $string(),
+            'createdAt' => Spec::string('date-time'),
+        ]));
+        $spec->schema('Ticket', Spec::object([
+            'id' => Spec::string('uuid'),
+            'number' => Spec::integer(),
+            'type' => Spec::enum(array_keys(Ticket::TYPES)),
+            'title' => $string(),
+            'status' => Spec::enum(array_keys(Ticket::STATUSES)),
+            'createdAt' => Spec::string('date-time'),
+            'updatedAt' => Spec::string('date-time'),
+            'awaitingSupport' => Spec::boolean(),
+            'description' => $string(),
+            'appVersion' => Spec::string(null, true),
+            'platform' => Spec::string(null, true),
+            'messages' => Spec::arrayOf(Spec::ref('TicketMessage')),
+        ]));
+        $spec->schema('TicketList', Spec::object(['tickets' => Spec::arrayOf(Spec::ref('TicketSummary'))]));
+        $spec->schema('CreateTicketRequest', Spec::object([
+            'type' => Spec::enum(array_keys(Ticket::TYPES)),
+            'title' => $string(),
+            'description' => $string(),
+            'appVersion' => $string(),
+            'platform' => $string(),
+        ], ['type', 'title', 'description']));
+        $spec->schema('TicketMessageRequest', Spec::object(['body' => $string()], ['body']));
+        $spec->schema('TicketStatusRequest', Spec::object(['status' => Spec::enum(['open', 'closed'])], ['status']));
+
+        $tags = ['Support'];
+        $id = ['id' => Spec::string('uuid')];
+        $spec->operation('get', '/api/v1/tickets', 'listTickets', [
+            'tags' => $tags,
+            'auth' => true,
+            'summary' => 'List my tickets',
+            'query' => ['status' => ['schema' => Spec::enum(['open', 'closed'])]],
+            'responses' => [200 => Spec::ref('TicketList')],
+        ]);
+        $spec->operation('post', '/api/v1/tickets', 'createTicket', [
+            'tags' => $tags,
+            'auth' => true,
+            'summary' => 'Open a ticket',
+            'body' => Spec::ref('CreateTicketRequest'),
+            'responses' => [201 => Spec::ref('Ticket')],
+        ]);
+        $spec->operation('get', '/api/v1/tickets/{id}', 'getTicket', [
+            'tags' => $tags,
+            'auth' => true,
+            'summary' => 'One of my tickets with its conversation',
+            'path' => $id,
+            'responses' => [200 => Spec::ref('Ticket')],
+        ]);
+        $spec->operation('post', '/api/v1/tickets/{id}/messages', 'addTicketMessage', [
+            'tags' => $tags,
+            'auth' => true,
+            'summary' => 'Add a note to a ticket',
+            'path' => $id,
+            'body' => Spec::ref('TicketMessageRequest'),
+            'responses' => [201 => Spec::ref('Ticket')],
+        ]);
+        $spec->operation('post', '/api/v1/tickets/{id}/status', 'setTicketStatus', [
+            'tags' => $tags,
+            'auth' => true,
+            'summary' => 'Close or reopen a ticket',
+            'path' => $id,
+            'body' => Spec::ref('TicketStatusRequest'),
+            'responses' => [200 => Spec::ref('Ticket')],
+        ]);
+    }
 
     protected function dispatch(HTTPRequest $request): HTTPResponse|array|null
     {

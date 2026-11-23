@@ -29,7 +29,7 @@ final class AppConfig
     /** Browser origins allowed by CORS. Empty means any origin (tokens are bearer, not cookies). @var string[] */
     private static array $cors_origins = [];
 
-    /** Public base URL of this API, used for absolute links and the page-cache host check. */
+    /** Public base URL of this API, written into openapi.json. */
     private static string $public_url = 'http://localhost';
 
     /** Sender of transactional email. */

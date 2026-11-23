@@ -5,6 +5,7 @@ namespace BradTipper\AppBackend\Account;
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\Input;
 use BradTipper\AppBackend\Model\DevicePushToken;
+use BradTipper\AppBackend\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 
@@ -14,6 +15,22 @@ use SilverStripe\Control\HTTPResponse;
  */
 class DevicePushTokensController extends ApiController
 {
+    public static function describe(Spec $spec): void
+    {
+        $spec->schema('DevicePushTokenInput', Spec::object([
+            'token' => Spec::string(),
+            'platform' => Spec::enum(DevicePushToken::PLATFORMS),
+            'timezone' => Spec::string(null, true),
+        ], ['token', 'platform']));
+        $spec->operation('put', '/api/v1/device-push-tokens', 'registerDevicePushToken', [
+            'tags' => ['Notifications'],
+            'summary' => 'Register this device for push notifications',
+            'auth' => true,
+            'body' => Spec::ref('DevicePushTokenInput'),
+            'responses' => [200 => Spec::ref('Ok')],
+        ]);
+    }
+
     protected function dispatch(HTTPRequest $request): HTTPResponse
     {
         $this->requireMethod($request, 'PUT');

@@ -12,6 +12,7 @@ use SilverStripe\Core\Environment;
 /**
  * `POST /api/v1/_e2e/seed` for the Playwright runner. It does not exist unless the
  * site is in `dev` mode AND E2E_SEED_SECRET is set and presented in `X-E2E-Secret`.
+ * Deliberately left out of the OpenAPI document.
  */
 class E2eSeedController extends ApiController
 {
