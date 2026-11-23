@@ -4,7 +4,7 @@ Shared Silverstripe 6 headless API foundations for the app fleet. Each `{app}-ap
 
 - `Api/` - `ApiController` (JSON in/out, problem+json errors, method/path routing), `Input` validation, CORS middleware, health.
 - `Auth/` - opaque access + rotating refresh tokens, sign up/in/out, password reset, magic link, email confirmation, TOTP 2FA, profile.
-- `Account/` - tickets (rate limited), data export, 30-day account deletion, RevenueCat webhook, device push tokens.
+- `Account/` - contact/feedback/tickets (Turnstile + rate limit), data export, 30-day account deletion, RevenueCat webhook, device push tokens.
 - `Sync/` - `SyncedExtension` (UUID ids, soft delete, immutable owner) and `SyncController` (delta fetch + idempotent PUT) for offline-first entities.
 - `Files/` - `FileStore` (private storage under the owner's UUID, signed URLs), `UploadsController` and `FilesController`. Subclass the uploads controller to customise who may upload what.
 - `Plan/` - `PlanLimits` base class: per-tier limits from yml plus an owned-row counter. Each app subclasses it.

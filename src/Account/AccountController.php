@@ -8,6 +8,8 @@ use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
 use BradTipper\AppBackend\Auth\ApiMemberExtension;
 use BradTipper\AppBackend\Support\Notifications;
+use BradTipper\AppBackend\Model\ContactSubmission;
+use BradTipper\AppBackend\Model\FeedbackSubmission;
 use BradTipper\AppBackend\Model\RevenueCatEvent;
 use BradTipper\AppBackend\Model\Ticket;
 use SilverStripe\Control\HTTPRequest;
@@ -39,6 +41,8 @@ class AccountController extends ApiController
             'exportedAt' => gmdate(DATE_ATOM),
             'dataController' => (string) AppConfig::get('name'),
             'user' => $member->toApiUser(),
+            'contactSubmissions' => array_map($this->submissionRow(...), ContactSubmission::get()->filter('Email', $member->Email)->toArray()),
+            'feedbackSubmissions' => array_map($this->submissionRow(...), FeedbackSubmission::get()->filter('MemberID', $member->ID)->toArray()),
             'tickets' => array_map(static fn (Ticket $t) => $t->toApiDetail(), Ticket::get()->filter('OwnerID', $member->ID)->toArray()),
             'revenuecatWebhookEvents' => array_map(static fn (RevenueCatEvent $e) => [
                 'id' => $e->EventId,
@@ -51,6 +55,19 @@ class AccountController extends ApiController
         ];
         $member->extend('updateAccountExport', $data);
         return $data;
+    }
+
+    /** @return array<string, mixed> */
+    private function submissionRow(ContactSubmission|FeedbackSubmission $row): array
+    {
+        return [
+            'name' => $row->Name,
+            'email' => $row->Email,
+            'subject' => $row->Subject,
+            'message' => $row->Message,
+            'pageUrl' => $row->PageUrl,
+            'createdAt' => ApiMemberExtension::iso($row->Created),
+        ];
     }
 
     protected function doDeletionStatus(HTTPRequest $request): array

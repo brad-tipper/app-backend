@@ -6,6 +6,8 @@ SilverStripe\Control\Director:
   rules:
     'api/v1/health': BradTipper\AppBackend\Api\HealthController
     'api/v1/auth//$Action/$ID/$OtherID': BradTipper\AppBackend\Auth\AuthController
+    'api/v1/contact': BradTipper\AppBackend\Account\ContactController
+    'api/v1/feedback': BradTipper\AppBackend\Account\FeedbackController
     'api/v1/tickets//$Action/$ID': BradTipper\AppBackend\Account\TicketsController
     'api/v1/account//$Action': BradTipper\AppBackend\Account\AccountController
     'api/v1/webhooks/revenuecat': BradTipper\AppBackend\Account\RevenueCatWebhookController
