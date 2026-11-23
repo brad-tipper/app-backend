@@ -4,7 +4,6 @@ namespace BradTipper\AppBackend\Files;
 
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
-use BradTipper\AppBackend\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Security\Member;
@@ -18,33 +17,11 @@ use SilverStripe\Security\Member;
  *   GET    /api/v1/uploads/url?path=  a one-hour signed URL for the file
  *   DELETE /api/v1/uploads?path=      removes the file
  *
- * The upload is a raw body, so it is not in openapi.json; the app posts it with the shared API client.
+ * The upload is a raw body; the app posts it with the shared API client.
  */
 class UploadsController extends ApiController
 {
     private const URL_TTL = 3600;
-
-    public static function describe(Spec $spec): void
-    {
-        $spec->schema('SignedFileUrl', Spec::object([
-            'url' => Spec::string('uri'),
-            'expires_at' => Spec::string('date-time'),
-        ]));
-        $spec->operation('get', '/api/v1/uploads/url', 'getUploadUrl', [
-            'tags' => ['Uploads'],
-            'summary' => 'A short-lived signed URL for an uploaded file',
-            'auth' => true,
-            'query' => ['path' => ['schema' => Spec::string(), 'required' => true]],
-            'responses' => [200 => Spec::ref('SignedFileUrl')],
-        ]);
-        $spec->operation('delete', '/api/v1/uploads', 'deleteUpload', [
-            'tags' => ['Uploads'],
-            'summary' => 'Delete an uploaded file',
-            'auth' => true,
-            'query' => ['path' => ['schema' => Spec::string(), 'required' => true]],
-            'responses' => [204 => null],
-        ]);
-    }
 
     /**
      * The UUID of the area an upload is stored under, after checking the caller may write there. Default:

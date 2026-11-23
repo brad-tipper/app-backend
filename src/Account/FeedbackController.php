@@ -6,7 +6,6 @@ use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
 use BradTipper\AppBackend\Model\FeedbackSubmission;
-use BradTipper\AppBackend\OpenApi\Spec;
 use BradTipper\AppBackend\Support\Turnstile;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
@@ -15,28 +14,6 @@ use SilverStripe\Control\HTTPResponse;
 class FeedbackController extends ApiController
 {
     private const LABELS = ['bug' => 'Bug', 'feature' => 'Feature request', 'praise' => 'Praise'];
-
-    public static function describe(Spec $spec): void
-    {
-        $s = static fn () => Spec::string();
-        $spec->schema('FeedbackRequest', Spec::object([
-            'name' => $s(),
-            'email' => Spec::string('email'),
-            'type' => Spec::enum(['bug', 'feature', 'praise']),
-            'subject' => $s(),
-            'message' => $s(),
-            'pageUrl' => $s(),
-            'gdprConsent' => Spec::boolean(),
-            'turnstileToken' => $s(),
-        ], ['name', 'email', 'type', 'message', 'pageUrl', 'gdprConsent']));
-        $spec->schema('FeedbackResult', Spec::object(['ok' => Spec::boolean(), 'emailSent' => Spec::boolean()]));
-        $spec->operation('post', '/api/v1/feedback', 'submitFeedback', [
-            'tags' => ['Support'],
-            'summary' => 'Send feedback',
-            'body' => Spec::ref('FeedbackRequest'),
-            'responses' => [201 => Spec::ref('FeedbackResult')],
-        ]);
-    }
 
     protected function dispatch(HTTPRequest $request): HTTPResponse
     {

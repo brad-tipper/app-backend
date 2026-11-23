@@ -7,7 +7,6 @@ use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
 use Ramsey\Uuid\Uuid;
 use BradTipper\AppBackend\Auth\ApiMemberExtension;
-use BradTipper\AppBackend\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\DataList;
@@ -29,24 +28,6 @@ abstract class SyncController extends ApiController
 {
     /** @return class-string<DataObject> */
     abstract protected static function modelClass(): string;
-
-    /** Plural path segment, e.g. `lists`. */
-    abstract protected static function resourcePath(): string;
-
-    /** Schema name of one item, e.g. `List`. */
-    abstract protected static function itemName(): string;
-
-    /** @return array<string, array<string, mixed>> JSON schema properties of the read model (without the shared sync fields) */
-    abstract protected static function itemProperties(): array;
-
-    /** @return array<string, array<string, mixed>> properties accepted by PUT */
-    abstract protected static function writeProperties(): array;
-
-    /** @return string[] required keys of the PUT body */
-    protected static function writeRequired(): array
-    {
-        return [];
-    }
 
     /** Rows this member may see (own rows, plus shared ones). */
     abstract protected function visibleTo(Member $member): DataList;
@@ -225,63 +206,5 @@ abstract class SyncController extends ApiController
         ];
     }
 
-    // ---- OpenAPI ------------------------------------------------------
 
-    public static function describe(Spec $spec): void
-    {
-        $name = static::itemName();
-        $path = '/api/v1/' . static::resourcePath();
-        $tag = [ucfirst(static::resourcePath())];
-        $idParam = ['id' => Spec::string('uuid')];
-
-        $props = [
-            'id' => Spec::string('uuid'),
-            'owner_id' => Spec::string('uuid'),
-            ...static::itemProperties(),
-            'deleted' => Spec::boolean(),
-            'deleted_at' => Spec::string('date-time', true),
-            'created_at' => Spec::string('date-time'),
-            'updated_at' => Spec::string('date-time'),
-        ];
-        // deleted_at is always sent but optional for clients building rows locally (not every entity is trashable).
-        $spec->schema($name, Spec::object($props, array_values(array_diff(array_keys($props), ['deleted_at']))));
-        $spec->schema("{$name}List", Spec::object([
-            'items' => Spec::arrayOf(Spec::ref($name)),
-            'server_time' => Spec::string('date-time'),
-        ]));
-        $spec->schema("{$name}Input", Spec::object(
-            [...static::writeProperties(), 'deleted' => Spec::boolean()],
-            static::writeRequired(),
-        ));
-        $spec->schema("{$name}Patch", Spec::object([...static::writeProperties(), 'deleted' => Spec::boolean()], []));
-
-        $plural = ucfirst(static::resourcePath());
-        $spec->operation('get', $path, "list{$plural}", [
-            'tags' => $tag, 'summary' => "List {$name} rows (delta sync)", 'auth' => true,
-            'query' => [
-                'updated_since' => ['schema' => Spec::string('date-time')],
-                'include_deleted' => ['schema' => Spec::boolean()],
-            ],
-            'responses' => [200 => Spec::ref("{$name}List")],
-        ]);
-        $spec->operation('get', "{$path}/{id}", "get{$name}", [
-            'tags' => $tag, 'summary' => "Get one {$name}", 'auth' => true, 'path' => $idParam,
-            'responses' => [200 => Spec::ref($name)],
-        ]);
-        $spec->operation('put', "{$path}/{id}", "put{$name}", [
-            'tags' => $tag, 'summary' => "Create or update a {$name} (idempotent)", 'auth' => true, 'path' => $idParam,
-            'body' => Spec::ref("{$name}Input"),
-            'responses' => [200 => Spec::ref($name), 201 => Spec::ref($name)],
-        ]);
-        $spec->operation('patch', "{$path}/{id}", "patch{$name}", [
-            'tags' => $tag, 'summary' => "Update fields of a {$name}", 'auth' => true, 'path' => $idParam,
-            'body' => Spec::ref("{$name}Patch"),
-            'responses' => [200 => Spec::ref($name)],
-        ]);
-        $spec->operation('delete', "{$path}/{id}", "delete{$name}", [
-            'tags' => $tag, 'summary' => "Delete a {$name} (soft by default)", 'auth' => true, 'path' => $idParam,
-            'query' => ['permanent' => ['schema' => Spec::boolean()]],
-            'responses' => [204 => null],
-        ]);
-    }
 }

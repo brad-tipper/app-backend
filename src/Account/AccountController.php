@@ -12,7 +12,6 @@ use BradTipper\AppBackend\Model\ContactSubmission;
 use BradTipper\AppBackend\Model\FeedbackSubmission;
 use BradTipper\AppBackend\Model\RevenueCatEvent;
 use BradTipper\AppBackend\Model\Ticket;
-use BradTipper\AppBackend\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 
@@ -124,35 +123,4 @@ class AccountController extends ApiController
         ];
     }
 
-    public static function describe(Spec $spec): void
-    {
-        $spec->schema('DeletionStatus', Spec::object([
-            'requestedAt' => Spec::string('date-time', true),
-            'scheduledFor' => Spec::string('date-time', true),
-        ]));
-        $spec->schema('DeletionRequest', Spec::object([
-            'confirmation' => Spec::string(),
-            'email' => Spec::string('email'),
-        ], ['confirmation']));
-        $spec->schema('AccountExport', Spec::map());
-
-        $tag = ['Account'];
-        $spec->operation('get', '/api/v1/account/export', 'exportAccount', [
-            'tags' => $tag, 'summary' => 'Export all of the user\'s data', 'auth' => true,
-            'responses' => [200 => Spec::ref('AccountExport')],
-        ]);
-        $spec->operation('get', '/api/v1/account/deletion', 'getAccountDeletion', [
-            'tags' => $tag, 'summary' => 'Current deletion request, if any', 'auth' => true,
-            'responses' => [200 => Spec::ref('DeletionStatus')],
-        ]);
-        $spec->operation('post', '/api/v1/account/deletion', 'requestAccountDeletion', [
-            'tags' => $tag, 'summary' => 'Schedule the account for deletion', 'auth' => true,
-            'body' => Spec::ref('DeletionRequest'),
-            'responses' => [200 => Spec::ref('DeletionStatus')],
-        ]);
-        $spec->operation('delete', '/api/v1/account/deletion', 'cancelAccountDeletion', [
-            'tags' => $tag, 'summary' => 'Cancel a scheduled deletion', 'auth' => true,
-            'responses' => [200 => Spec::ref('DeletionStatus')],
-        ]);
-    }
 }

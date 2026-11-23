@@ -13,7 +13,7 @@ use SilverStripe\Control\HTTPResponse;
  *   GET /api/v1/files/{scope-uuid}/{name}?exp=&sig=   private files, with a signature from /api/v1/uploads/url
  *   GET /api/v1/logos/{scope-uuid}/{name}             public files named `logo-*` (they appear in emails); route it too if needed
  *
- * Not described in openapi.json.
+ * Opt-in: the app routes it in its own yml.
  */
 class FilesController extends ApiController
 {

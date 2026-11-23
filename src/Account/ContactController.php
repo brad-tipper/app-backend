@@ -6,33 +6,12 @@ use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
 use BradTipper\AppBackend\Model\ContactSubmission;
-use BradTipper\AppBackend\OpenApi\Spec;
 use BradTipper\AppBackend\Support\Turnstile;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 
 class ContactController extends ApiController
 {
-    public static function describe(Spec $spec): void
-    {
-        $s = static fn () => Spec::string();
-        $spec->schema('ContactRequest', Spec::object([
-            'name' => $s(),
-            'email' => Spec::string('email'),
-            'subject' => $s(),
-            'message' => $s(),
-            'pageUrl' => $s(),
-            'gdprConsent' => Spec::boolean(),
-            'turnstileToken' => $s(),
-        ], ['name', 'email', 'subject', 'message', 'pageUrl', 'gdprConsent']));
-        $spec->operation('post', '/api/v1/contact', 'submitContact', [
-            'tags' => ['Support'],
-            'summary' => 'Send a contact message',
-            'body' => Spec::ref('ContactRequest'),
-            'responses' => [201 => Spec::ref('Ok')],
-        ]);
-    }
-
     protected function dispatch(HTTPRequest $request): HTTPResponse
     {
         $this->requireMethod($request, 'POST');

@@ -1,6 +1,6 @@
 {
   "name": "bradtipper/app-backend",
-  "description": "Shared Silverstripe 6 headless API foundations (auth, sync helpers, OpenAPI) for the app fleet.",
+  "description": "Shared Silverstripe 6 headless API foundations (auth, sync helpers) for the app fleet.",
   "type": "silverstripe-vendormodule",
   "license": "proprietary",
   "require": {

@@ -8,7 +8,6 @@ use BradTipper\AppBackend\Api\ApiException;
 use Ramsey\Uuid\Uuid;
 use BradTipper\AppBackend\Auth\ApiMemberExtension;
 use BradTipper\AppBackend\Model\RevenueCatEvent;
-use BradTipper\AppBackend\OpenApi\Spec;
 use BradTipper\AppBackend\Support\Notifications;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
@@ -32,24 +31,6 @@ class RevenueCatWebhookController extends ApiController
 
     private const ACTIVE = ['INITIAL_PURCHASE', 'RENEWAL', 'UNCANCELLATION', 'PRODUCT_CHANGE', 'NON_RENEWING_PURCHASE'];
     private const EXPIRED = ['EXPIRATION'];
-
-    public static function describe(Spec $spec): void
-    {
-        $spec->schema('RevenueCatWebhookRequest', ['type' => 'object', 'properties' => ['event' => Spec::map()], 'required' => ['event']]);
-        $spec->schema('RevenueCatWebhookResult', Spec::object([
-            'ok' => Spec::boolean(),
-            'processed' => Spec::boolean(),
-            'outcome' => Spec::string(),
-            'subscriptionStatus' => Spec::string(),
-            'notified' => Spec::boolean(),
-        ], ['ok', 'processed']));
-        $spec->operation('post', '/api/v1/webhooks/revenuecat', 'revenueCatWebhook', [
-            'tags' => ['Webhooks'],
-            'summary' => 'RevenueCat server-to-server event',
-            'body' => Spec::ref('RevenueCatWebhookRequest'),
-            'responses' => [200 => Spec::ref('RevenueCatWebhookResult')],
-        ]);
-    }
 
     protected function dispatch(HTTPRequest $request): array
     {

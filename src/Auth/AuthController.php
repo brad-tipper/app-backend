@@ -6,7 +6,6 @@ use BradTipper\AppBackend\AppConfig;
 use BradTipper\AppBackend\Api\ApiController;
 use BradTipper\AppBackend\Api\ApiException;
 use BradTipper\AppBackend\Api\Input;
-use BradTipper\AppBackend\OpenApi\Spec;
 use BradTipper\AppBackend\Support\Mailer;
 use BradTipper\AppBackend\Support\Notifications;
 use BradTipper\AppBackend\Support\Secrets;
@@ -548,85 +547,5 @@ class AuthController extends ApiController
         return $errors ?: [$defaultField => ['Invalid value.']];
     }
 
-    // ---- OpenAPI ------------------------------------------------------
 
-    public static function describe(Spec $spec): void
-    {
-        $tag = ['Auth'];
-        $s = static fn (?string $f = null) => Spec::string($f);
-
-        $spec->schema('SignUpRequest', Spec::object([
-            'email' => $s('email'),
-            'password' => $s(),
-            'name' => $s(),
-            'firstName' => $s(),
-            'lastName' => $s(),
-            'country' => $s(),
-            'redirectUrl' => $s('uri'),
-            'captchaToken' => $s(),
-        ], ['email', 'password']));
-        $spec->schema('SignInRequest', Spec::object([
-            'email' => $s('email'),
-            'password' => $s(),
-            'captchaToken' => $s(),
-        ], ['email', 'password']));
-        $spec->schema('RefreshRequest', Spec::object(['refreshToken' => $s()]));
-        $spec->schema('ForgotPasswordRequest', Spec::object([
-            'email' => $s('email'),
-            'redirectUrl' => $s('uri'),
-            'captchaToken' => $s(),
-        ], ['email']));
-        $spec->schema('ResetPasswordRequest', Spec::object(['token' => $s(), 'password' => $s()]));
-        $spec->schema('ChangePasswordRequest', Spec::object(['currentPassword' => $s(), 'newPassword' => $s()]));
-        $spec->schema('MagicLinkRequest', Spec::object(['email' => $s('email'), 'redirectUrl' => $s('uri')], ['email']));
-        $spec->schema('TokenRequest', Spec::object(['token' => $s()]));
-        $spec->schema('ResendConfirmationRequest', Spec::object(['email' => $s('email'), 'redirectUrl' => $s('uri')], ['email']));
-        $spec->schema('MfaVerifyRequest', Spec::object([
-            'mfaToken' => $s(),
-            'code' => $s(),
-            'recoveryCode' => $s(),
-        ], ['mfaToken']));
-        $spec->schema('MfaEnrollment', Spec::object(['secret' => $s(), 'otpauthUri' => $s()]));
-        $spec->schema('MfaConfirmRequest', Spec::object(['code' => $s()]));
-        $spec->schema('MfaRecoveryCodes', Spec::object(['recoveryCodes' => Spec::arrayOf($s())]));
-        $spec->schema('UpdateProfileRequest', Spec::object([
-            'name' => $s(),
-            'firstName' => $s(),
-            'lastName' => $s(),
-            'country' => $s(),
-            'units' => Spec::enum(['metric', 'imperial']),
-            'dateFormat' => $s(),
-            'timezone' => $s(),
-            'preferences' => Spec::map(),
-        ], []));
-
-        $ok = Spec::ref('Ok');
-        $result = Spec::ref('AuthResult');
-        $op = static fn (string $m, string $p, string $id, string $summary, ?string $body, array $response, bool $auth = false)
-            => $spec->operation($m, "/api/v1/auth/{$p}", $id, [
-                'tags' => $tag,
-                'summary' => $summary,
-                'auth' => $auth,
-                ...($body ? ['body' => Spec::ref($body)] : []),
-                'responses' => [200 => $response],
-            ]);
-
-        $op('post', 'sign-up', 'signUp', 'Create an account', 'SignUpRequest', $result);
-        $op('post', 'sign-in', 'signIn', 'Sign in with email and password', 'SignInRequest', $result);
-        $op('post', 'refresh', 'refreshSession', 'Rotate the refresh token', 'RefreshRequest', Spec::ref('Session'));
-        $op('post', 'sign-out', 'signOut', 'Revoke the current session', null, $ok, true);
-        $op('get', 'me', 'getMe', 'The signed-in user', null, Spec::ref('User'), true);
-        $op('patch', 'me', 'updateMe', 'Update the signed-in user', 'UpdateProfileRequest', Spec::ref('User'), true);
-        $op('post', 'password/forgot', 'forgotPassword', 'Email a password reset link', 'ForgotPasswordRequest', $ok);
-        $op('post', 'password/reset', 'resetPassword', 'Set a new password using an emailed token', 'ResetPasswordRequest', $ok);
-        $op('post', 'password/change', 'changePassword', 'Change password', 'ChangePasswordRequest', $ok, true);
-        $op('post', 'otp/request', 'requestMagicLink', 'Email a sign-in link', 'MagicLinkRequest', $ok);
-        $op('post', 'otp/verify', 'verifyMagicLink', 'Sign in with an emailed token', 'TokenRequest', $result);
-        $op('post', 'email/confirm', 'confirmEmail', 'Confirm an email address', 'TokenRequest', $result);
-        $op('post', 'email/resend', 'resendConfirmation', 'Resend the confirmation email', 'ResendConfirmationRequest', $ok);
-        $op('post', 'mfa/verify', 'verifyMfa', 'Finish a two-factor sign-in', 'MfaVerifyRequest', $result);
-        $op('post', 'mfa/enroll', 'enrollMfa', 'Begin two-factor enrolment', null, Spec::ref('MfaEnrollment'), true);
-        $op('post', 'mfa/enroll/confirm', 'confirmMfaEnrollment', 'Confirm enrolment with a code', 'MfaConfirmRequest', Spec::ref('MfaRecoveryCodes'), true);
-        $op('post', 'mfa/disable', 'disableMfa', 'Turn off two-factor authentication (needs an MFA-verified session)', null, $ok, true);
-    }
 }
