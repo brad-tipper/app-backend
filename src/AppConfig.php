@@ -44,6 +44,12 @@ final class AppConfig
 
     private static string $brand_logo_url = '';
 
+    /** Turnstile site key for the portal widgets (a website's SiteConfig TurnstileSiteKey wins when it has one). */
+    private static string $turnstile_site_key = '';
+
+    /** Privacy policy URL linked from the portal contact and feedback consent line. */
+    private static string $privacy_url = '';
+
     /** Path of the web app's subscription screen, linked from billing emails. */
     private static string $subscription_path = '/subscription';
 

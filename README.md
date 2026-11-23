@@ -17,3 +17,10 @@ Opt-in controllers (`DevicePushTokensController`, `Files\UploadsController`, `Fi
 Mail: set `MAILER_DSN` (a real environment variable, or `Environment::setEnv()` in the project's `app/_config.php`). There is no module-level transport config.
 
 Config lives in `_config/app-backend.yml`. See each `{app}-api` README for environment variables.
+
+## Support portal and login branding
+
+- `/portal` is a standalone, branded page for the project's website: customers sign in with their app email and password (two-factor supported) to see their tickets, read replies, add notes, close or reopen, and open new requests. `/portal?view=contact` and `/portal?view=feedback` show the contact and feedback forms for visitors. Nothing here uses a session or cookie, so the pages stay cacheable; the widgets call the same `/api/v1` endpoints as the apps (tokens live in `sessionStorage`).
+- Embed the widgets elsewhere on the site with `<div data-support-portal></div>`, `<div data-contact-form></div>` or `<div data-feedback-form></div>` plus `<script src="/portal/widget.js" defer></script>`. The script is `client/portal.js` with the project's branding prepended by `PortalController`.
+- Branding comes from `AppConfig`: `name`, `brand_color`, `brand_color_text`, `brand_logo_url`, `privacy_url`, and `turnstile_site_key` (a website's `SiteConfig.TurnstileSiteKey` wins when it has one; with neither, the Turnstile check is skipped, which the API only allows outside live).
+- `LoginBrandExtension` whitelabels `/Security/login` (and lost/change password): the project's name and logo replace Silverstripe's, buttons use the brand colour, and the Silverstripe footer is hidden. The CMS (`/admin`) keeps its own look.
