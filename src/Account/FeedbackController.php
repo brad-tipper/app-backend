@@ -58,7 +58,8 @@ class FeedbackController extends ApiController
             $in->fail('gdprConsent', 'Consent is required.');
             $in->assertValid();
         }
-        if (!Turnstile::verify($token, $ip)) {
+        // Signed-in app users are already identified (and rate limited); the captcha is for anonymous visitors.
+        if ($this->currentMember($request) === null && !Turnstile::verify($token, $ip)) {
             throw ApiException::badRequest('Captcha verification failed.', 'captcha_failed');
         }
 
