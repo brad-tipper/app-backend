@@ -4,8 +4,6 @@ namespace BradTipper\AppBackend\Testing;
 
 use BradTipper\AppBackend\Auth\ApiToken;
 use BradTipper\AppBackend\Auth\AuthChallenge;
-use BradTipper\AppBackend\Model\ContactSubmission;
-use BradTipper\AppBackend\Model\FeedbackSubmission;
 use BradTipper\AppBackend\Model\RevenueCatEvent;
 use BradTipper\AppBackend\Support\RateLimitBucket;
 use BradTipper\AppBackend\Support\Secrets;
@@ -37,7 +35,7 @@ final class E2eSeeder
         foreach (Member::get()->exclude('ID', $admin->ID) as $member) {
             $member->delete();
         }
-        foreach ([ApiToken::class, AuthChallenge::class, ContactSubmission::class, FeedbackSubmission::class, RevenueCatEvent::class, RateLimitBucket::class] as $class) {
+        foreach ([ApiToken::class, AuthChallenge::class, RevenueCatEvent::class, RateLimitBucket::class] as $class) {
             $class::get()->removeAll();
         }
     }
