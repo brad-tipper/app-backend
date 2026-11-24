@@ -1,6 +1,6 @@
 {
-  "name": "bradtipper/app-backend",
-  "description": "Shared Silverstripe 6 headless API foundations (auth, sync helpers, OpenAPI) for the app fleet.",
+  "name": "bradtipper/silverstripe-restful-framework",
+  "description": "Silverstripe 6 headless RESTful API foundations for apps: JSON controllers, token auth with MFA, sync, files, queued jobs and mail.",
   "type": "silverstripe-vendormodule",
   "license": "proprietary",
   "require": {
@@ -8,10 +8,17 @@
     "silverstripe/framework": "^6.0",
     "symbiote/silverstripe-queuedjobs": "^6",
     "phptek/sentry": "^6",
-    "ramsey/uuid": "^4.7"
+    "ramsey/uuid": "^4.7",
+    "bradtipper/silverstripe-openapi-export": "^0.1"
   },
   "require-dev": {
     "phpunit/phpunit": "^11.3"
+  },
+  "suggest": {
+    "bradtipper/silverstripe-service-desk": "Tickets, contact and feedback endpoints, CMS admin and public support portal",
+    "bradtipper/silverstripe-revenuecat": "RevenueCat webhook, subscription events and subscription emails",
+    "bradtipper/silverstripe-cloudflare-page-cache": "Full-page cache for the public website with Cloudflare purge",
+    "bradtipper/silverstripe-login-screens": "Brand the Silverstripe login pages from YAML"
   },
   "autoload": {
     "psr-4": {

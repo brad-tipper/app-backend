@@ -4,9 +4,6 @@ namespace BradTipper\AppBackend\Testing;
 
 use BradTipper\AppBackend\Auth\ApiToken;
 use BradTipper\AppBackend\Auth\AuthChallenge;
-use BradTipper\AppBackend\Model\ContactSubmission;
-use BradTipper\AppBackend\Model\FeedbackSubmission;
-use BradTipper\AppBackend\Model\RevenueCatEvent;
 use BradTipper\AppBackend\Support\RateLimitBucket;
 use BradTipper\AppBackend\Support\Secrets;
 use BradTipper\AppBackend\Support\Totp;
@@ -37,8 +34,19 @@ final class E2eSeeder
         foreach (Member::get()->exclude('ID', $admin->ID) as $member) {
             $member->delete();
         }
-        foreach ([ApiToken::class, AuthChallenge::class, ContactSubmission::class, FeedbackSubmission::class, RevenueCatEvent::class, RateLimitBucket::class] as $class) {
-            $class::get()->removeAll();
+        // Rows kept by this module and by the optional modules (service desk, RevenueCat) when they are installed.
+        $classes = [
+            ApiToken::class,
+            AuthChallenge::class,
+            RateLimitBucket::class,
+            'BradTipper\AppBackend\Model\ContactSubmission',
+            'BradTipper\AppBackend\Model\FeedbackSubmission',
+            'BradTipper\AppBackend\Model\RevenueCatEvent',
+        ];
+        foreach ($classes as $class) {
+            if (class_exists($class)) {
+                $class::get()->removeAll();
+            }
         }
     }
 

@@ -4,9 +4,6 @@ namespace BradTipper\AppBackend\Admin;
 
 use BradTipper\AppBackend\Auth\ApiToken;
 use BradTipper\AppBackend\Auth\AuthChallenge;
-use BradTipper\AppBackend\Model\ContactSubmission;
-use BradTipper\AppBackend\Model\FeedbackSubmission;
-use BradTipper\AppBackend\Model\RevenueCatEvent;
 use BradTipper\AppBackend\Sync\SyncedExtension;
 use ReflectionClass;
 use SilverStripe\Core\ClassInfo;
@@ -26,9 +23,9 @@ use SilverStripe\Security\Member;
 
 /**
  * Security → Users shows everything about a user in one place: their account state, sessions, password reset and
- * sign-in links, subscription events, feedback, and every row of app data they own (one tab per data type that
+ * sign-in links, and every row of app data they own (one tab per data type that
  * has any). Secrets (TOTP secrets, recovery codes) are never shown, and subscription state is read-only because it
- * is written only by the RevenueCat webhook.
+ * is written only by the subscription webhook (silverstripe-revenuecat). Other modules add their own tabs with their own Member extension.
  *
  * @property Member|MemberAdminExtension $owner
  */
@@ -82,28 +79,6 @@ class MemberAdminExtension extends Extension
             'Links',
             AuthChallenge::get()->filter('MemberID', $member->ID)->sort('Created', 'DESC'),
             $this->viewerWithDelete()
-        ));
-
-        if ($member->UUID) {
-            $fields->addFieldToTab('Root.SubscriptionEvents', $this->grid(
-                'SubscriptionEvents',
-                RevenueCatEvent::get()->filter('AppUserUuid', $member->UUID)->sort('EventAt', 'DESC'),
-                GridFieldConfig_RecordViewer::create(25)
-            ));
-            $fields->findOrMakeTab('Root.SubscriptionEvents')->setTitle('Subscription events');
-        }
-
-        $fields->addFieldToTab('Root.Feedback', $this->grid(
-            'FeedbackSent',
-            FeedbackSubmission::get()->filter('MemberID', $member->ID)->sort('Created', 'DESC'),
-            GridFieldConfig_RecordViewer::create(25),
-            'Feedback'
-        ));
-        $fields->addFieldToTab('Root.Feedback', $this->grid(
-            'ContactSent',
-            ContactSubmission::get()->filter('Email', $member->Email)->sort('Created', 'DESC'),
-            GridFieldConfig_RecordViewer::create(25),
-            'Contact messages'
         ));
 
         $this->addOwnedData($fields);
