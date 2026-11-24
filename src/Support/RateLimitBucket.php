@@ -5,7 +5,7 @@ namespace BradTipper\AppBackend\Support;
 use SilverStripe\ORM\DataObject;
 
 /**
- * Fixed-window counter used by RateLimiter (replaces Supabase's rate_limit_buckets).
+ * Fixed-window counter used by RateLimiter (replaces the old rate_limit_buckets table).
  *
  * @property string $BucketKey
  * @property int $Hits
