@@ -76,13 +76,6 @@ SilverStripe\SiteConfig\SiteConfig:
     - BradTipper\AppBackend\Support\SiteConfigBrandExtension
 
 ---
-Name: app-backend-login-brand
----
-SilverStripe\Security\Security:
-  extensions:
-    - BradTipper\AppBackend\Portal\LoginBrandExtension
-
----
 Name: app-backend-cache
 After:
   - '#requestprocessors'
