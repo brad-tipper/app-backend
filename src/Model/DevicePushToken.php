@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend\Model;
+namespace BradTipper\RestfulFramework\Model;
 
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;

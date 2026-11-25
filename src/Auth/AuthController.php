@@ -1,17 +1,17 @@
 <?php
 
-namespace BradTipper\AppBackend\Auth;
+namespace BradTipper\RestfulFramework\Auth;
 
-use BradTipper\AppBackend\AppConfig;
-use BradTipper\AppBackend\Api\ApiController;
-use BradTipper\AppBackend\Api\ApiException;
-use BradTipper\AppBackend\Api\Input;
-use BradTipper\AppBackend\OpenApi\Spec;
-use BradTipper\AppBackend\Support\Mailer;
-use BradTipper\AppBackend\Support\Notifications;
-use BradTipper\AppBackend\Support\Secrets;
-use BradTipper\AppBackend\Support\Totp;
-use BradTipper\AppBackend\Support\Turnstile;
+use BradTipper\RestfulFramework\AppConfig;
+use BradTipper\RestfulFramework\Api\ApiController;
+use BradTipper\RestfulFramework\Api\ApiException;
+use BradTipper\RestfulFramework\Api\Input;
+use BradTipper\RestfulFramework\OpenApi\Spec;
+use BradTipper\RestfulFramework\Support\Mailer;
+use BradTipper\RestfulFramework\Support\Notifications;
+use BradTipper\RestfulFramework\Support\Secrets;
+use BradTipper\RestfulFramework\Support\Totp;
+use BradTipper\RestfulFramework\Support\Turnstile;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Security\Member;

@@ -1,8 +1,8 @@
 <?php
 
-namespace BradTipper\AppBackend\Api;
+namespace BradTipper\RestfulFramework\Api;
 
-use BradTipper\AppBackend\AppConfig;
+use BradTipper\RestfulFramework\AppConfig;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Control\Middleware\HTTPMiddleware;

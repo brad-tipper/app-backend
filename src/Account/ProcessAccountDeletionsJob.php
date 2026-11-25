@@ -1,9 +1,9 @@
 <?php
 
-namespace BradTipper\AppBackend\Account;
+namespace BradTipper\RestfulFramework\Account;
 
-use BradTipper\AppBackend\Jobs\RecurringJob;
-use BradTipper\AppBackend\Support\Notifications;
+use BradTipper\RestfulFramework\Jobs\RecurringJob;
+use BradTipper\RestfulFramework\Support\Notifications;
 use SilverStripe\Security\Member;
 
 /**

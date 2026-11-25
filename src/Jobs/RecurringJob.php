@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend\Jobs;
+namespace BradTipper\RestfulFramework\Jobs;
 
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJob;
@@ -9,7 +9,7 @@ use Symbiote\QueuedJobs\Services\QueuedJobService;
 /**
  * A job that runs forever on a schedule: when it finishes it queues its own next
  * run. One live instance per class (the signature is the class name). List the
- * class under `BradTipper\AppBackend\Jobs\Scheduler: jobs:` and it is queued
+ * class under `BradTipper\RestfulFramework\Jobs\Scheduler: jobs:` and it is queued
  * on `dev/build`, so a fresh deploy starts the chain.
  */
 abstract class RecurringJob extends AbstractQueuedJob

@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend\Support;
+namespace BradTipper\RestfulFramework\Support;
 
 /** RFC 6238 time-based one-time passwords (SHA-1, 6 digits, 30 second step). */
 final class Totp

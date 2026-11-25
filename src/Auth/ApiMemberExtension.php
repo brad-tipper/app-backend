@@ -1,10 +1,10 @@
 <?php
 
-namespace BradTipper\AppBackend\Auth;
+namespace BradTipper\RestfulFramework\Auth;
 
-use BradTipper\AppBackend\Model\DevicePushToken;
-use BradTipper\AppBackend\Support\Secrets;
-use BradTipper\AppBackend\Sync\SyncedExtension;
+use BradTipper\RestfulFramework\Model\DevicePushToken;
+use BradTipper\RestfulFramework\Support\Secrets;
+use BradTipper\RestfulFramework\Sync\SyncedExtension;
 use Ramsey\Uuid\Uuid;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Extension;

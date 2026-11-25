@@ -1,8 +1,8 @@
 <?php
 
-namespace BradTipper\AppBackend\Files;
+namespace BradTipper\RestfulFramework\Files;
 
-use BradTipper\AppBackend\AppConfig;
+use BradTipper\RestfulFramework\AppConfig;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Environment;
@@ -15,7 +15,7 @@ use SilverStripe\Core\Environment;
  *
  * Each app tunes it in its own yml:
  *
- *   BradTipper\AppBackend\Files\FileStore:
+ *   BradTipper\RestfulFramework\Files\FileStore:
  *     storage_dir: '.storage'
  *     max_bytes: 52428800
  *     types:

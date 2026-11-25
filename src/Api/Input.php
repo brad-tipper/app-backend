@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend\Api;
+namespace BradTipper\RestfulFramework\Api;
 
 use Ramsey\Uuid\Uuid;
 use SilverStripe\Control\HTTPRequest;

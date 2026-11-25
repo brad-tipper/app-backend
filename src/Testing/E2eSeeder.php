@@ -1,12 +1,12 @@
 <?php
 
-namespace BradTipper\AppBackend\Testing;
+namespace BradTipper\RestfulFramework\Testing;
 
-use BradTipper\AppBackend\Auth\ApiToken;
-use BradTipper\AppBackend\Auth\AuthChallenge;
-use BradTipper\AppBackend\Support\RateLimitBucket;
-use BradTipper\AppBackend\Support\Secrets;
-use BradTipper\AppBackend\Support\Totp;
+use BradTipper\RestfulFramework\Auth\ApiToken;
+use BradTipper\RestfulFramework\Auth\AuthChallenge;
+use BradTipper\RestfulFramework\Support\RateLimitBucket;
+use BradTipper\RestfulFramework\Support\Secrets;
+use BradTipper\RestfulFramework\Support\Totp;
 use SilverStripe\Security\DefaultAdminService;
 use SilverStripe\Security\Member;
 
@@ -39,9 +39,9 @@ final class E2eSeeder
             ApiToken::class,
             AuthChallenge::class,
             RateLimitBucket::class,
-            'BradTipper\AppBackend\Model\ContactSubmission',
-            'BradTipper\AppBackend\Model\FeedbackSubmission',
-            'BradTipper\AppBackend\Model\RevenueCatEvent',
+            'BradTipper\RestfulFramework\Model\ContactSubmission',
+            'BradTipper\RestfulFramework\Model\FeedbackSubmission',
+            'BradTipper\RestfulFramework\Model\RevenueCatEvent',
         ];
         foreach ($classes as $class) {
             if (class_exists($class)) {

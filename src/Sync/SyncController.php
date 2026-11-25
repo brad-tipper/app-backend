@@ -1,13 +1,13 @@
 <?php
 
-namespace BradTipper\AppBackend\Sync;
+namespace BradTipper\RestfulFramework\Sync;
 
-use BradTipper\AppBackend\Api\ApiController;
-use BradTipper\AppBackend\Api\ApiException;
-use BradTipper\AppBackend\Api\Input;
+use BradTipper\RestfulFramework\Api\ApiController;
+use BradTipper\RestfulFramework\Api\ApiException;
+use BradTipper\RestfulFramework\Api\Input;
 use Ramsey\Uuid\Uuid;
-use BradTipper\AppBackend\Auth\ApiMemberExtension;
-use BradTipper\AppBackend\OpenApi\Spec;
+use BradTipper\RestfulFramework\Auth\ApiMemberExtension;
+use BradTipper\RestfulFramework\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\DataList;

@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend\Sync;
+namespace BradTipper\RestfulFramework\Sync;
 
 use Ramsey\Uuid\Uuid;
 use SilverStripe\Core\Extension;

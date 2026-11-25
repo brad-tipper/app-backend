@@ -1,14 +1,14 @@
 <?php
 
-namespace BradTipper\AppBackend\Account;
+namespace BradTipper\RestfulFramework\Account;
 
-use BradTipper\AppBackend\AppConfig;
-use BradTipper\AppBackend\Api\ApiController;
-use BradTipper\AppBackend\Api\ApiException;
-use BradTipper\AppBackend\Api\Input;
-use BradTipper\AppBackend\Auth\ApiMemberExtension;
-use BradTipper\AppBackend\Support\Notifications;
-use BradTipper\AppBackend\OpenApi\Spec;
+use BradTipper\RestfulFramework\AppConfig;
+use BradTipper\RestfulFramework\Api\ApiController;
+use BradTipper\RestfulFramework\Api\ApiException;
+use BradTipper\RestfulFramework\Api\Input;
+use BradTipper\RestfulFramework\Auth\ApiMemberExtension;
+use BradTipper\RestfulFramework\Support\Notifications;
+use BradTipper\RestfulFramework\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 
