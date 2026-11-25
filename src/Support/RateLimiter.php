@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend\Support;
+namespace BradTipper\RestfulFramework\Support;
 
 final class RateLimiter
 {

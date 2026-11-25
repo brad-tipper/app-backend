@@ -33,13 +33,13 @@ Opt-in controllers (`DevicePushTokensController`, `Files\UploadsController`, `Fi
 
 ## Configure
 
-Everything an app sets lives in `BradTipper\AppBackend\AppConfig`, in the project's `app/_config/app.yml`. Use `Only: environment` fragments for per-environment values, and keep secrets in a `live` fragment.
+Everything an app sets lives in `BradTipper\RestfulFramework\AppConfig`, in the project's `app/_config/app.yml`. Use `Only: environment` fragments for per-environment values, and keep secrets in a `live` fragment.
 
 ```yaml
 ---
 Name: myapp-config
 ---
-BradTipper\AppBackend\AppConfig:
+BradTipper\RestfulFramework\AppConfig:
   name: MyApp                              # emails and the authenticator entry
   public_url: 'https://myapp.example'      # this API's origin (openapi.json, redirects)
   web_url: 'https://use.myapp.example'     # the web app; default target of emailed links
@@ -62,7 +62,7 @@ Name: myapp-config-dev
 Only:
   environment: dev
 ---
-BradTipper\AppBackend\AppConfig:
+BradTipper\RestfulFramework\AppConfig:
   public_url: 'https://myapp-api.ddev.site'
   web_url: 'http://localhost:8081'
   rate_limit_multiplier: 50                # tests sign in repeatedly
@@ -71,7 +71,7 @@ Name: myapp-secrets-live
 Only:
   environment: live
 ---
-BradTipper\AppBackend\AppConfig:
+BradTipper\RestfulFramework\AppConfig:
   app_key: '...'                           # base64 key for encrypting secrets
   smtp_password: '...'                     # your app/_config.php builds MAILER_DSN from it
   turnstile_secret_key: '...'              # Cloudflare Turnstile, for web sign-up and contact forms
@@ -79,14 +79,14 @@ BradTipper\AppBackend\AppConfig:
 
 Other keys: `rate_limit_multiplier`, `e2e_captcha_token` and `e2e_seed_secret` (automated tests only, never in live), `privacy_url`, `turnstile_site_key`, and the RevenueCat keys documented in `silverstripe-revenuecat`.
 
-Sessions, password rules and the account deletion grace period have defaults in `_config/app-backend.yml` and are overridden the same way:
+Sessions, password rules and the account deletion grace period have defaults in `_config/restful-framework.yml` and are overridden the same way:
 
 ```yaml
-BradTipper\AppBackend\Auth\SessionService:
+BradTipper\RestfulFramework\Auth\SessionService:
   access_ttl: 3600                         # seconds
   refresh_ttl: 5184000
   require_email_confirmation: true
-BradTipper\AppBackend\Account\AccountController:
+BradTipper\RestfulFramework\Account\AccountController:
   deletion_grace_days: 30
 SilverStripe\Security\Member:
   lock_out_after_incorrect_logins: 10
@@ -98,9 +98,9 @@ Route opt-in controllers:
 ```yaml
 SilverStripe\Control\Director:
   rules:
-    'api/v1/device-push-tokens': BradTipper\AppBackend\Account\DevicePushTokensController
-    'api/v1/uploads//$Action': BradTipper\AppBackend\Files\UploadsController
-    'api/v1/files//$ID/$OtherID': BradTipper\AppBackend\Files\FilesController
+    'api/v1/device-push-tokens': BradTipper\RestfulFramework\Account\DevicePushTokensController
+    'api/v1/uploads//$Action': BradTipper\RestfulFramework\Files\UploadsController
+    'api/v1/files//$ID/$OtherID': BradTipper\RestfulFramework\Files\FilesController
 ```
 
 Make your own model sync (UUID, soft delete, owner):
@@ -108,13 +108,13 @@ Make your own model sync (UUID, soft delete, owner):
 ```yaml
 App\Model\Note:
   extensions:
-    - BradTipper\AppBackend\Sync\SyncedExtension
+    - BradTipper\RestfulFramework\Sync\SyncedExtension
 ```
 
 Schedule your own recurring job (a `RecurringJob` subclass):
 
 ```yaml
-BradTipper\AppBackend\Jobs\Scheduler:
+BradTipper\RestfulFramework\Jobs\Scheduler:
   jobs:
     - App\Jobs\SendDigestJob
 ```

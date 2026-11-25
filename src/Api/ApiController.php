@@ -1,10 +1,10 @@
 <?php
 
-namespace BradTipper\AppBackend\Api;
+namespace BradTipper\RestfulFramework\Api;
 
-use BradTipper\AppBackend\AppConfig;
-use BradTipper\AppBackend\Auth\SessionService;
-use BradTipper\AppBackend\Support\RateLimiter;
+use BradTipper\RestfulFramework\AppConfig;
+use BradTipper\RestfulFramework\Auth\SessionService;
+use BradTipper\RestfulFramework\Support\RateLimiter;
 use Psr\Log\LoggerInterface;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPRequest;

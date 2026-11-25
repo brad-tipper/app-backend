@@ -1,11 +1,11 @@
 <?php
 
-namespace BradTipper\AppBackend\Testing;
+namespace BradTipper\RestfulFramework\Testing;
 
-use BradTipper\AppBackend\AppConfig;
-use BradTipper\AppBackend\Api\ApiController;
-use BradTipper\AppBackend\Api\ApiException;
-use BradTipper\AppBackend\Api\Input;
+use BradTipper\RestfulFramework\AppConfig;
+use BradTipper\RestfulFramework\Api\ApiController;
+use BradTipper\RestfulFramework\Api\ApiException;
+use BradTipper\RestfulFramework\Api\Input;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Environment;
 

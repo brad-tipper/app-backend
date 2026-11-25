@@ -1,9 +1,9 @@
 <?php
 
-namespace BradTipper\AppBackend\Files;
+namespace BradTipper\RestfulFramework\Files;
 
-use BradTipper\AppBackend\Api\ApiController;
-use BradTipper\AppBackend\Api\ApiException;
+use BradTipper\RestfulFramework\Api\ApiController;
+use BradTipper\RestfulFramework\Api\ApiException;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
 

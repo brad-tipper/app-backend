@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend;
+namespace BradTipper\RestfulFramework;
 
 use SilverStripe\Core\Config\Configurable;
 
@@ -71,7 +71,7 @@ final class AppConfig
     /** Secrets. Empty by default; set in yml (live values in a `live` fragment). */
     private static string $app_key = '';
 
-    /** Read by each project's app/_config.php to build its MAILER_DSN; app-backend itself never uses it. */
+    /** Read by each project's app/_config.php to build its MAILER_DSN; restful-framework itself never uses it. */
     private static string $smtp_password = '';
 
     private static string $turnstile_secret_key = '';

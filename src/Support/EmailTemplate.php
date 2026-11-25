@@ -1,8 +1,8 @@
 <?php
 
-namespace BradTipper\AppBackend\Support;
+namespace BradTipper\RestfulFramework\Support;
 
-use BradTipper\AppBackend\AppConfig;
+use BradTipper\RestfulFramework\AppConfig;
 
 /**
  * The one email layout every app shares, branded per app through AppConfig

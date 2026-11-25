@@ -1,8 +1,8 @@
 <?php
 
-namespace BradTipper\AppBackend\OpenApi;
+namespace BradTipper\RestfulFramework\OpenApi;
 
-use BradTipper\AppBackend\Auth\ApiMemberExtension;
+use BradTipper\RestfulFramework\Auth\ApiMemberExtension;
 
 /** Schemas shared by every app's API. */
 final class CommonSchemas

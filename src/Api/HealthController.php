@@ -1,8 +1,8 @@
 <?php
 
-namespace BradTipper\AppBackend\Api;
+namespace BradTipper\RestfulFramework\Api;
 
-use BradTipper\AppBackend\OpenApi\Spec;
+use BradTipper\RestfulFramework\OpenApi\Spec;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\ORM\DB;
 

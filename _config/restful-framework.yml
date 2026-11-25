@@ -1,0 +1,70 @@
+---
+Name: restful-framework-routes
+Before: '*'
+---
+SilverStripe\Control\Director:
+  rules:
+    'api/v1/health': BradTipper\RestfulFramework\Api\HealthController
+    'api/v1/auth//$Action/$ID/$OtherID': BradTipper\RestfulFramework\Auth\AuthController
+    'api/v1/account//$Action': BradTipper\RestfulFramework\Account\AccountController
+    'api/v1/_e2e/seed': BradTipper\RestfulFramework\Testing\E2eSeedController
+---
+Name: restful-framework-middleware
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Control\Director:
+    properties:
+      Middlewares:
+        RestfulFrameworkCors: '%$BradTipper\RestfulFramework\Api\CorsMiddleware'
+---
+Name: restful-framework-passwords
+After: '#corepasswords'
+---
+# Matches the client-side rule: 12+ characters with lower, upper, digit and symbol.
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Validation\PasswordValidator:
+    class: SilverStripe\Security\Validation\RulesPasswordValidator
+SilverStripe\Security\Validation\RulesPasswordValidator:
+  min_length: 12
+  min_test_score: 4
+---
+Name: restful-framework-member
+---
+SilverStripe\Security\Member:
+  extensions:
+    - BradTipper\RestfulFramework\Auth\ApiMemberExtension
+    - BradTipper\RestfulFramework\Admin\MemberAdminExtension
+  lock_out_after_incorrect_logins: 10
+  lock_out_delay_mins: 15
+  defaults:
+    Timezone: 'Pacific/Auckland'
+    DisplayDateFormat: 'en-NZ'
+    Units: 'metric'
+BradTipper\RestfulFramework\Auth\SessionService:
+  access_ttl: 3600
+  refresh_ttl: 5184000
+  require_email_confirmation: false
+BradTipper\RestfulFramework\Account\AccountController:
+  deletion_grace_days: 30
+---
+Name: restful-framework-jobs
+---
+Symbiote\QueuedJobs\DataObjects\QueuedJobDescriptor:
+  extensions:
+    - BradTipper\RestfulFramework\Jobs\SchedulerExtension
+BradTipper\RestfulFramework\Jobs\Scheduler:
+  jobs:
+    - BradTipper\RestfulFramework\Account\ProcessAccountDeletionsJob
+---
+Name: restful-framework-branding
+---
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - BradTipper\RestfulFramework\Support\SiteConfigBrandExtension
+---
+Name: restful-framework-openapi
+---
+# Shared schemas (Problem, Ok, Health, User, Session, AuthResult) for the OpenAPI export.
+BradTipper\RestfulFramework\OpenApi\OpenApiExportTask:
+  schema_providers:
+    - BradTipper\RestfulFramework\OpenApi\CommonSchemas

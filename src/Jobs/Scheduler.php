@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend\Jobs;
+namespace BradTipper\RestfulFramework\Jobs;
 
 use SilverStripe\Core\Config\Configurable;
 use Symbiote\QueuedJobs\DataObjects\QueuedJobDescriptor;

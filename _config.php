@@ -11,7 +11,7 @@ error_reporting(error_reporting() & ~E_DEPRECATED);
 // Behind the hosting proxy the request reaches PHP as plain http, so Silverstripe would build
 // absolute URLs (the CMS's own redirects, for one) with http://. Each API already states its own
 // public origin per environment, so use that as the base URL.
-$publicUrl = rtrim((string) \BradTipper\AppBackend\AppConfig::get('public_url'), '/');
+$publicUrl = rtrim((string) \BradTipper\RestfulFramework\AppConfig::get('public_url'), '/');
 if ($publicUrl !== '' && $publicUrl !== 'http://localhost') {
     \SilverStripe\Core\Config\Config::modify()->set(\SilverStripe\Control\Director::class, 'alternate_base_url', $publicUrl);
 }

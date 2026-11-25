@@ -1,6 +1,6 @@
 <?php
 
-namespace BradTipper\AppBackend\Plan;
+namespace BradTipper\RestfulFramework\Plan;
 
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\ORM\DataObject;
@@ -11,7 +11,7 @@ use SilverStripe\Security\Member;
  * trusted to be the only gate. Each app subclasses this, sets its `tiers` in yml and adds a count method
  * per limited thing:
  *
- *   class PlanLimits extends \BradTipper\AppBackend\Plan\PlanLimits
+ *   class PlanLimits extends \BradTipper\RestfulFramework\Plan\PlanLimits
  *   {
  *       public static function listCount(Member $member, ?string $excludeUuid = null): int
  *       {

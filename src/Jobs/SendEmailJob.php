@@ -1,8 +1,8 @@
 <?php
 
-namespace BradTipper\AppBackend\Jobs;
+namespace BradTipper\RestfulFramework\Jobs;
 
-use BradTipper\AppBackend\Support\Mailer;
+use BradTipper\RestfulFramework\Support\Mailer;
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJob;
 

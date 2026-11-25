@@ -1,8 +1,8 @@
 <?php
 
-namespace BradTipper\AppBackend\Auth;
+namespace BradTipper\RestfulFramework\Auth;
 
-use BradTipper\AppBackend\AppConfig;
+use BradTipper\RestfulFramework\AppConfig;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Security\Member;

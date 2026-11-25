@@ -1,8 +1,8 @@
 <?php
 
-namespace BradTipper\AppBackend\Support;
+namespace BradTipper\RestfulFramework\Support;
 
-use BradTipper\AppBackend\AppConfig;
+use BradTipper\RestfulFramework\AppConfig;
 use SilverStripe\Core\Environment;
 
 /** Cloudflare Turnstile server-side verification. */

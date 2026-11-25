@@ -1,10 +1,10 @@
 <?php
 
-namespace BradTipper\AppBackend\Admin;
+namespace BradTipper\RestfulFramework\Admin;
 
-use BradTipper\AppBackend\Auth\ApiToken;
-use BradTipper\AppBackend\Auth\AuthChallenge;
-use BradTipper\AppBackend\Sync\SyncedExtension;
+use BradTipper\RestfulFramework\Auth\ApiToken;
+use BradTipper\RestfulFramework\Auth\AuthChallenge;
+use BradTipper\RestfulFramework\Sync\SyncedExtension;
 use ReflectionClass;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Extension;

@@ -1,9 +1,9 @@
 <?php
 
-namespace BradTipper\AppBackend\Support;
+namespace BradTipper\RestfulFramework\Support;
 
-use BradTipper\AppBackend\AppConfig;
-use BradTipper\AppBackend\Jobs\SendEmailJob;
+use BradTipper\RestfulFramework\AppConfig;
+use BradTipper\RestfulFramework\Jobs\SendEmailJob;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Environment;
 use Symbiote\QueuedJobs\Services\QueuedJob;

@@ -9,7 +9,7 @@
     "symbiote/silverstripe-queuedjobs": "^6",
     "phptek/sentry": "^6",
     "ramsey/uuid": "^4.7",
-    "bradtipper/silverstripe-openapi-export": "^0.1"
+    "bradtipper/silverstripe-openapi-export": "^0.2"
   },
   "require-dev": {
     "phpunit/phpunit": "^11.3"
@@ -22,8 +22,8 @@
   },
   "autoload": {
     "psr-4": {
-      "BradTipper\\AppBackend\\": "src/",
-      "BradTipper\\AppBackend\\Tests\\": "tests/"
+      "BradTipper\\RestfulFramework\\": "src/",
+      "BradTipper\\RestfulFramework\\Tests\\": "tests/"
     }
   },
   "minimum-stability": "dev",
